@@ -1,0 +1,2 @@
+add a map upgrade
+add a enemy killed and enemy count counter
