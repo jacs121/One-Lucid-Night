@@ -1,4 +1,4 @@
-!add a map upgrade
-add a enemy killed and enemy count counter
-check if a maine enemy works
-add a model to the maine enemy
+x  add a map upgrade
+*  add a enemy killed and enemy count counter
+.  check if a maine enemy works
+.  add a model to the maine enemy
