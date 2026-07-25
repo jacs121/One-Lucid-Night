@@ -1186,7 +1186,7 @@ class Rune(Entity):
         pass
 
 class WhisperRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = -1, enabled: bool = False):
+    def __init__(self, position = (0, 1, 0), uses = 3, enabled: bool = False):
         super().__init__("Whisper Rune", position, uses=uses, enabled=enabled)
 
     def action(self, dt):
