@@ -17,6 +17,7 @@ import hashlib
 import math
 import random
 from panda3d.core import PartSubset
+
 app = Ursina()
 
 # -----------------------------
@@ -748,13 +749,14 @@ class Enemy(Entity):
             trigger_screen_fade()
 
 class Staticon(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, base_color: color.Color = color.gray, ai_active: bool = True):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, base_color: color.Color = color.gray, ai_active: bool = True, enabled: bool = False):
         super().__init__(
             model="models/staticon.glb",
             scale=size,
             position=position,
             max_health=max_health,
-            color=base_color
+            color=base_color,
+            enabled=enabled
         )
         
         self.speed=speed
@@ -881,9 +883,7 @@ class Staticon(Enemy):
                     )
                 )
                 if angle > player.view_cone_half_angle or self.awareness_range > dist > self.awareness_range/1.5:
-                    dx = player.x - self.x
-                    dz = player.z - self.z
-                    target_rotation_y = math.degrees(math.atan2(dx, dz))
+                    target_rotation_y = math.degrees(math.atan2(direction.x, direction.z))
                     self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     
                     if dist <= self.attack_range*self.scale.length():
@@ -909,12 +909,13 @@ class Staticon(Enemy):
             self.update_texture_offset()
 
 class Obeliskus(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 8, max_health: int = 100, ai_active: bool = True):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, enabled: bool = False):
         super().__init__(
             model="models/obeliskus.glb",
             position=position,
             scale=size,
-            max_health=max_health
+            max_health=max_health,
+            enabled=enabled
         )
         
         char = self.model.find("**/+Character").node()
@@ -940,7 +941,6 @@ class Obeliskus(Enemy):
         self.attack_range = attack_range
         self.awareness_range = awareness_range
         self.attacked_timer = 0
-        print(self.anim_controls.keys())
         self.anim_controls["hit"].setPlayRate(0.5)
         self.anim_controls["idle"].play()
         
@@ -988,17 +988,14 @@ class Obeliskus(Enemy):
             dist = max(to_self.length() - self.scale.length() / 2, 0)
             if self.awareness_range > dist:
                 direction = to_self.normalized()
-                if dist > 0.05 and self.attacked_timer <= 0:
-                    dx = player.x - self.x
-                    dz = player.z - self.z
-                    
-                    target_rotation_y = math.degrees(math.atan2(dx, dz))
-                    angle_diff = (target_rotation_y % 360 - self.rotation_y % 360 + 180) % 360 - 180
-                    if angle_diff > 16:
-                        self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 2)
+                if self.attacked_timer <= 0:
+                    target_rotation_y = math.degrees(math.atan2(to_self.x, to_self.z))
+                    angle_diff = abs(((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180)
+                    if angle_diff > 4:
+                        print(angle_diff)
+                        self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     else:
                         if dist <= self.attack_range*self.scale.length():
-                            pass
                             if not self.anim_controls["bite"].is_playing():
                                 self.anim_controls["bite"].play()
                         else:
@@ -1006,11 +1003,11 @@ class Obeliskus(Enemy):
                                 self.speed * dt * self.scale.length() * (self.health/self.max_health),
                                 dist
                             )
-                            
+
                             if not self.anim_controls["move"].is_playing():
                                 self.anim_controls["move"].play()
 
-            if self.attack_range < dist:
+            if self.attack_range*self.scale.length() < dist:
                 if self.anim_controls["bite"].get_frame() < 15:
                     self.anim_controls["bite"].stop()
                 
@@ -1023,7 +1020,13 @@ class Obeliskus(Enemy):
                 if self.anim_controls["bite"].get_frame() in [15, 27, 41]:
                     self.attack(5)
 
-            if (dist <= 1 or self.attacked_timer > 0) and not self.anim_controls["bite"].is_playing():
+            dx = player.x - self.x
+            dz = player.z - self.z
+
+            target_rotation_y = math.degrees(math.atan2(dx, dz))
+            angle_diff = ((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180
+
+            if (dist <= 1 or self.attacked_timer > 0) and not self.anim_controls["bite"].is_playing() or angle_diff > 4:
                 self.anim_controls["idle"].play()
 
     def damage(self, damage):
@@ -1032,13 +1035,14 @@ class Obeliskus(Enemy):
             self.anim_controls["hit"].setPlayRate(0.5*self.health/self.max_health)
 
 class Maime(Enemy):
-    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False):
+    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False, enabled: bool = False):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(
             item.model,
             position=item.position,
             scale=item.scale,
-            max_health=max_health
+            max_health=max_health,
+            enabled=enabled
         )
         
         self.health = max_health
@@ -1176,7 +1180,7 @@ class Rune(Entity):
 
 class WhisperRune(Rune):
     def __init__(self, position = (0, 0.3, 0), uses = -1):
-        super().__init__(position, uses)
+        super().__init__("Whisper Rune", position, uses=uses)
 
     def action(self, dt):
         global dialog_id, dialog_text, dialog_timer
@@ -1186,7 +1190,7 @@ class WhisperRune(Rune):
 
 class HarmRune(Rune):
     def __init__(self, position = (0, 0.3, 0), uses = 2):
-        super().__init__(position, uses)
+        super().__init__("Harm Rune", position, uses=uses)
 
     def action(self, dt):
         for enemy in enemies:
@@ -1335,10 +1339,10 @@ for wave_num in range(5):
     waves.append({"items": [], "enemies": [], "runes": []})
     for _ in range(2*wave_num):
         if wave_num == 0:
-            runes.append(WhisperRune(random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])/2, 5), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])/2, 5)))
+            runes.append(WhisperRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])/2, 5), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])/2, 5))))
         if wave_num >= 3:
             for _ in range(wave_num-1):
-                runes.append(HarmRune(random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])/2, 5), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])/2, 5)))
+                runes.append(HarmRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 12), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 12))))
         waves[-1]["enemies"].append(Staticon((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 12), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 12))))
         if random.random() < 0.25:
             waves[-1]["items"].append(fullMedicineKit((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14))))
