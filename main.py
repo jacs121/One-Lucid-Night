@@ -175,6 +175,7 @@ class Player(Entity):
         self.last_mouse_x = mouse.x
         self.last_mouse_y = mouse.y
         self.direction = Vec3(0)
+        self.waving_mora = 0 # not yet made to do anything
 
         self.shotgun_ammo_count = 0
         self.ammo_packets_count = 0
@@ -207,11 +208,12 @@ class Player(Entity):
         self.anim_controls["idle"].play()
         self.prev_frame_num = -1
         self.animation = "idle"
-        print("player initialized:")
-        print("    model:", self.model)
-        print("    available animation:")
-        print("\n        "+"\n        ".join(self.anim_controls.keys()))
-        print("    animation:", self.animation)
+        if self.enabled:
+            print("player initialized:")
+            print("    model:", self.model)
+            print("    available animation:")
+            print("\n        "+"\n        ".join(self.anim_controls.keys()))
+            print("    animation:", self.animation)
     
     def update_player(self, dt):
         self.update_shotgun(dt)
@@ -517,6 +519,7 @@ dialog_ui = Text(
 dialog_text = "where am I?..."
 dialog_timer = 0
 dialog_id = 0
+DIALOG_SPEED = 1/15
 player.can_move = False
 
 tutorial = Text(
@@ -605,7 +608,7 @@ pump_bar_fill = Entity(
 # -----------------------------
 
 class Item(Entity):
-    def __init__(self, item_name: str, position: tuple[int, int, int] = (0, 1.3, 0), gather_distance: float = 0.5, enabled: bool = True):
+    def __init__(self, item_name: str, position: tuple[int, int, int] = (0, 1.3, 0), gather_distance: float = 0.5, enabled: bool = False):
         super().__init__(
             model="sphere",
             scale=(0.75,0,0.75),
@@ -640,11 +643,11 @@ class Item(Entity):
             "texture_scale",
             Vec2(1/self.scale.x, 1/self.scale.y)
         )
+        if self.enabled:
+            print(f"added items to the map:")
+            print("    item name:", item_name.upper())
+            print("    gathering distance:", gather_distance)
         
-        print(f"added items to the map:")
-        print("    item name:", item_name.upper())
-        print("    gathering distance:", gather_distance)
-    
     def update_item(self, dt):
         global dialog_text, dialog_timer, dialog_id
         if self.fade_in_timer < 1:
@@ -674,28 +677,28 @@ class Item(Entity):
         pass
 
 class ammoBox(Item):
-    def __init__(self, position = (0, 1.3, 0)):
-        super().__init__("ammo box", position, 0.5)
+    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
+        super().__init__("ammo box", position, 0.5, enabled)
 
     def give(self, distance, dt):
         player.ammo_packets_count += 8
 
 class medicine(Item):
-    def __init__(self, position = (0, 1.3, 0)):
-        super().__init__("medicine", position, 0.25)
+    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
+        super().__init__("medicine", position, 0.25, enabled)
 
     def give(self, distance, dt):
         player.health = min(player.health + player.max_health/10, player.max_health)
 
 class fullMedicineKit(Item):
-    def __init__(self, position = (0, 1.3, 0)):
-        super().__init__("full medicine kit", position, 0.5)
+    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
+        super().__init__("full medicine kit", position, 0.5, enabled)
 
     def give(self, distance, dt):
         player.health = player.max_health
 
 class Enemy(Entity):
-    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 100, color: color.Color = color.white, enabled: bool = True):
+    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 100, color: color.Color = color.white, enabled: bool = False):
         super().__init__(
             model=model,
             scale=scale,
@@ -798,19 +801,19 @@ class Staticon(Enemy):
         self.anim_controls["attack"].setPlayRate(0.75)
         self.anim_controls["walking"].setPlayRate(2)
         self.anim_controls["idle"].play()
-        
-        print("a staticon has been summoned:")
-        print("    model:", self.model)
-        print("    available animation:")
-        print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
-        print("    animation:", "idle")
-        print("    stats:")
-        print("        SPEED:", self.speed)
-        print("        SIZE:", self.scale.length())
-        print("        HEALTH/MAX_HEALTH:", self.health)
-        print("        ATTACK_RANGE:", self.attack_range)
-        print("        AWARENESS_RANGE:", self.awareness_range)
-        print("    game ai:", self.ai_active)
+        if self.enabled:
+            print("a staticon has been summoned:")
+            print("    model:", self.model)
+            print("    available animation:")
+            print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
+            print("    animation:", "idle")
+            print("    stats:")
+            print("        SPEED:", self.speed)
+            print("        SIZE:", self.scale.length())
+            print("        HEALTH/MAX_HEALTH:", self.health)
+            print("        ATTACK_RANGE:", self.attack_range)
+            print("        AWARENESS_RANGE:", self.awareness_range)
+            print("    game ai:", self.ai_active)
 
     def damage(self, damage: int):
         damaged = super().damage(damage)
@@ -944,18 +947,19 @@ class Obeliskus(Enemy):
         self.anim_controls["hit"].setPlayRate(0.5)
         self.anim_controls["idle"].play()
         
-        print("a obeliskus has been summoned:")
-        print("    model:", self.model)
-        print("    available animation:")
-        print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
-        print("    animation:", "idle")
-        print("    stats:")
-        print("        SPEED:", self.speed)
-        print("        SIZE:", self.scale.length())
-        print("        HEALTH/MAX_HEALTH:", self.health)
-        print("        ATTACK_RANGE:", self.attack_range)
-        print("        AWARENESS_RANGE:", self.awareness_range)
-        print("    game ai:", self.ai_active)
+        if self.enabled:
+            print("a obeliskus has been summoned:")
+            print("    model:", self.model)
+            print("    available animation:")
+            print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
+            print("    animation:", "idle")
+            print("    stats:")
+            print("        SPEED:", self.speed)
+            print("        SIZE:", self.scale.length())
+            print("        HEALTH/MAX_HEALTH:", self.health)
+            print("        ATTACK_RANGE:", self.attack_range)
+            print("        AWARENESS_RANGE:", self.awareness_range)
+            print("    game ai:", self.ai_active)
 
     def update_entity(self, dt):
         # Entity death visuals
@@ -1064,20 +1068,21 @@ class Maime(Enemy):
 
         destroy(item)
         
-        print("a maime has been summoned:")
-        print("    item disguised:", self.model)
-        print("        MODEL:", self.itemData[0])
-        print("        SCALE:", self.itemData[1])
-        # print("    available animation:")
-        # print("\n        ".join(self.anim_controls.keys()).upper())
-        # print("    animation:", "idle")
-        print("    stats:")
-        print("        SPEED:", self.speed)
-        print("        SIZE:", self.scale.length())
-        print("        HEALTH/MAX_HEALTH:", self.health)
-        print("        ATTACK_RANGE:", self.attack_range)
-        print("        AWARENESS_RANGE:", self.awareness_range)
-        print("    game ai:", self.ai_active)
+        if self.enabled:
+            print("a maime has been summoned:")
+            print("    item disguised:", self.model)
+            print("        MODEL:", self.itemData[0])
+            print("        SCALE:", self.itemData[1])
+            # print("    available animation:")
+            # print("\n        ".join(self.anim_controls.keys()).upper())
+            # print("    animation:", "idle")
+            print("    stats:")
+            print("        SPEED:", self.speed)
+            print("        SIZE:", self.scale.length())
+            print("        HEALTH/MAX_HEALTH:", self.health)
+            print("        ATTACK_RANGE:", self.attack_range)
+            print("        AWARENESS_RANGE:", self.awareness_range)
+            print("    game ai:", self.ai_active)
     
     def update_entity(self, dt):
         if self.fade_in_timer < 1:
@@ -1135,12 +1140,11 @@ class Maime(Enemy):
 # Rune statues
 # -----------------------------
 class Rune(Entity):
-    def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,0.3,0), activation_distance: int = 1, uses: int = -1, enabled: bool = True):
+    def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 1, activation_distance: int = 1, uses: int = -1, enabled: bool = False):
         super().__init__(
             model= "quad",
-            scale=(1, 0, 1),
+            scale=(size, 0, size),
             position=position,
-            color=color.white,
             enabled=enabled
         )
         self.uses = uses
@@ -1157,6 +1161,9 @@ class Rune(Entity):
             world_scale=(9.5,0.01875),
             enabled=False
         )
+        self.scale = Vec3(0)
+        self.size = size
+        self.animate_scale(Vec3(size,0,size), 1)
     
     def update_rune(self, dt):
         self.rotation_y += dt*10
@@ -1170,7 +1177,7 @@ class Rune(Entity):
                 destroy(self)
 
         self.label.color = color.orange if self.used else color.white
-        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*2*self.scale.length():
+        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*2*self.scale.length() and self.scale.xz == Vec2(self.size):
             self.label.enable()
         else:
             self.label.disable()
@@ -1179,8 +1186,8 @@ class Rune(Entity):
         pass
 
 class WhisperRune(Rune):
-    def __init__(self, position = (0, 0.3, 0), uses = -1):
-        super().__init__("Whisper Rune", position, uses=uses)
+    def __init__(self, position = (0, 1, 0), uses = -1, enabled: bool = False):
+        super().__init__("Whisper Rune", position, uses=uses, enabled=enabled)
 
     def action(self, dt):
         global dialog_id, dialog_text, dialog_timer
@@ -1189,12 +1196,52 @@ class WhisperRune(Rune):
         dialog_id = 5
 
 class HarmRune(Rune):
-    def __init__(self, position = (0, 0.3, 0), uses = 2):
-        super().__init__("Harm Rune", position, uses=uses)
-
+    def __init__(self, position = (0, 1, 0), uses = 2, enabled: bool = False):
+        super().__init__("Harm Rune", position, uses=uses, enabled=enabled)
+        
     def action(self, dt):
         for enemy in enemies:
             enemy.damage(8*self.uses)
+
+class AdvancingRune(Rune):
+    def __init__(self, position = (0, 1, 0), uses = -1, enabled = False):
+        super().__init__("Advancing Rune", position, size=2, uses=uses, enabled=enabled)
+        self.color = color.hsv(0, 0.5, 1)
+        
+        if self.enabled:
+            self.sound = Audio('audio/runes/advancing_rune.mp3', autoplay=True, loop=True)
+
+    def action(self, dt):
+        global wave_num, items, enemies, runes, game_won, screen_fade_animation, advancing_rune
+        if self.scale.xz != Vec2(2):
+            return
+        wave_num += 1
+        if wave_num-1 < len(waves):
+            for item in waves[wave_num-1]["items"]:
+                items.append(duplicate(item, enabled=True))
+
+            for enemy in waves[wave_num-1]["enemies"]:
+                enemies.append(duplicate(enemy, enabled=True))
+
+            for rune in waves[wave_num-1]["runes"]:
+                runes.append(duplicate(rune, enabled=True))
+
+            destroy(advancing_rune)
+            advancing_rune = None
+        else:
+            game_won = True
+            screen_fade_animation = 1
+    
+    def update_rune(self, dt):
+        super().update_rune(dt)
+        # Dynamically pan left or right based on x-position relative to camera
+        # Clamp the balance between -1 (left) and 1 (right)
+        panning = (self.x - camera.x) / 10
+        self.sound.balance = clamp(panning, -1, 1)
+        
+        # reduce volume with distance
+        distance = distance_xz(self.position, camera.position)
+        self.sound.volume = clamp(1 / (1 + distance * 0.05), 0, 1)
 
 # -----------------------------
 # Attack effect
@@ -1314,9 +1361,9 @@ def input(key):
         reload_image.disable()
         ammo_packets_count_ui.disable()
         if tutorial.enabled:
-            enemies.append(Obeliskus((15, 0.3, 15)))
-            enemies[0].enable()
+            enemies.append(Staticon((15, 0.3, 15), enabled=True))
             tutorial.disable()
+
         dialog_id = 4
         dialog_text = ""
         dialog_timer = 0
@@ -1333,29 +1380,36 @@ items: list[Item] = []
 runes: list[Rune] = []
 
 waves: list[dict[str, list[Item] | list[Enemy]]] = []
-wave_num = 0
+advancing_rune = None
 
-for wave_num in range(5):
+for wave_num in range(10):
     waves.append({"items": [], "enemies": [], "runes": []})
-    for _ in range(2*wave_num):
-        if wave_num == 0:
-            runes.append(WhisperRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])/2, 5), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])/2, 5))))
+    if wave_num == 0:
+        runes.append(WhisperRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])/2, 6), 1, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])/2, 6))))
+    else:
         if wave_num >= 3:
             for _ in range(wave_num-1):
-                runes.append(HarmRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 12), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 12))))
-        waves[-1]["enemies"].append(Staticon((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 12), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 12))))
-        if random.random() < 0.25:
-            waves[-1]["items"].append(fullMedicineKit((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14))))
-        else:
-            waves[-1]["items"].append(medicine((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14))))        
-    waves[-1]["items"].append(medicine((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 14))))        
+                runes.append(HarmRune((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 8), 1, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 8))))
 
+        if random.random() < 0.15*wave_num:
+            waves[-1]["items"].append(fullMedicineKit((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 10), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 10))))
+        else:
+            waves[-1]["items"].append(medicine((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 10), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 10))))        
+
+        for _ in range(wave_num + wave_num//4):
+            waves[-1]["enemies"].append(Staticon((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 8), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 8))))
+
+        for _ in range(wave_num//2):
+            waves[-1]["enemies"].append(Staticon((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 8), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 8))))
+
+        waves[-1]["items"].append(medicine((random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[0])-1, 10), 0.3, random.choice([-1, 1])*random.uniform(abs(BOUNDARY_REGION[1])-1, 10))))        
+
+wave_num = 0
 game_over = game_won = False
 ground.fade_in(1, duration=3)
 
 def update():
-    global items, enemies, runes, wave_num
-    global screen_shift_strength, screen_fade_animation, void_noise_timer
+    global screen_shift_strength, screen_fade_animation, void_noise_timer, advancing_rune
     global game_won, dialog_timer, dialog_text, dialog_id, skip_to_dialog_id
 
     dt = time.dt
@@ -1427,8 +1481,7 @@ def update():
             crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
             player.can_move = False
             tutorial.text = "TUTORIAL: GO TOUCH THE ITEM"
-            items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-            items[0].enable()
+            items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
             
         elif dialog_id == 4:
             tutorial.text = "TUTORIAL: PRESS R TO LOAD SHOTGUN"
@@ -1437,7 +1490,9 @@ def update():
     if dialog_text != "":
         if dialog_id == 3:
             tutorial.text = ""
-        dialog_timer += dt*15
+        dialog_timer += dt/DIALOG_SPEED
+        if int(dialog_timer - dt/DIALOG_SPEED) == dialog_timer - dt/DIALOG_SPEED:
+            print(Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True).playing)
         dialog_ui.text = dialog_text[:int(min(dialog_timer, len(dialog_text)))]
     else:
         dialog_timer = 0
@@ -1468,19 +1523,7 @@ def update():
     for rune in runes:
         rune.update_rune(dt)
 
-    if alive_enemies == 0 and dialog_id > 4:
-        wave_num += 1
-        if wave_num-1 < len(waves):
-            for item in waves[wave_num-1]["items"]:
-                items.append(duplicate(item, enabled=True))
-
-            for enemy in waves[wave_num-1]["enemies"]:
-                enemies.append(duplicate(enemy, enabled=True))
-
-            for rune in waves[wave_num-1]["runes"]:
-                runes.append(duplicate(rune, enabled=True))
-        else:
-            game_won = True
-            screen_fade_animation = 1
+    if alive_enemies == 0 and dialog_id > 3 and advancing_rune == None:
+        advancing_rune = AdvancingRune(enabled=True)
 
 app.run()
