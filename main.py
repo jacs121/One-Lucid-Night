@@ -1161,9 +1161,9 @@ class Rune(Entity):
             world_scale=(9.5,0.01875),
             enabled=False
         )
-        self.scale = Vec3(0)
+        # self.scale = Vec3(0)
         self.size = size
-        self.animate_scale(Vec3(size,0,size), 1)
+        # self.animate_scale(Vec3(size,0,size), 1)
     
     def update_rune(self, dt):
         self.rotation_y += dt*10
@@ -1492,7 +1492,7 @@ def update():
             tutorial.text = ""
         dialog_timer += dt/DIALOG_SPEED
         if int(dialog_timer - dt/DIALOG_SPEED) == dialog_timer - dt/DIALOG_SPEED:
-            print(Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True).playing)
+            Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True).playing
         dialog_ui.text = dialog_text[:int(min(dialog_timer, len(dialog_text)))]
     else:
         dialog_timer = 0
@@ -1523,7 +1523,7 @@ def update():
     for rune in runes:
         rune.update_rune(dt)
 
-    if alive_enemies == 0 and dialog_id > 3 and advancing_rune == None:
+    if alive_enemies == 0 and dialog_id > 3 and advancing_rune == None and not tutorial.enabled:
         advancing_rune = AdvancingRune(enabled=True)
 
 app.run()
