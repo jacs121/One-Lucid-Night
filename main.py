@@ -1142,8 +1142,8 @@ class Maime(Enemy):
 class Rune(Entity):
     def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 1, activation_distance: int = 1, uses: int = -1, enabled: bool = False):
         super().__init__(
-            model= "quad",
-            scale=(size, 0, size),
+            model="cube",
+            scale=(size, 0.5, size),
             position=position,
             enabled=enabled
         )
@@ -1161,9 +1161,9 @@ class Rune(Entity):
             world_scale=(9.5,0.01875),
             enabled=False
         )
-        # self.scale = Vec3(0)
+        self.scale = Vec3(0)
         self.size = size
-        # self.animate_scale(Vec3(size,0,size), 1)
+        self.animate_scale(Vec3(size,1,size), 1)
     
     def update_rune(self, dt):
         self.rotation_y += dt*10
