@@ -1143,7 +1143,7 @@ class Rune(Entity):
     def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 1, activation_distance: int = 1, uses: int = -1, enabled: bool = False):
         super().__init__(
             model="cube",
-            scale=(size, 0.5, size),
+            scale=(size, 1, size),
             position=position,
             enabled=enabled
         )
@@ -1161,23 +1161,26 @@ class Rune(Entity):
             world_scale=(9.5,0.01875),
             enabled=False
         )
-        self.scale = Vec3(0)
         self.size = size
-        self.animate_scale(Vec3(size,1,size), 1)
-    
+        if self.enabled:
+            self.scale = Vec3(0)
+            self.animate_scale(Vec3(size,1,size), 1)
+        
     def update_rune(self, dt):
         self.rotation_y += dt*10
-        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*self.scale.length() and not self.used:
+        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance and not self.used:
             self.used = True
             self.action(dt)
             if self.uses > 0:
                 self.uses -= 1
             if self.uses == 0:
-                runes.remove(self)
+                if self in runes:
+                    runes.remove(self)
                 destroy(self)
+                
 
         self.label.color = color.orange if self.used else color.white
-        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*2*self.scale.length() and self.scale.xz == Vec2(self.size):
+        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*2 and self.scale.xz == Vec2(self.size):
             self.label.enable()
         else:
             self.label.disable()
@@ -1207,14 +1210,15 @@ class AdvancingRune(Rune):
     def __init__(self, position = (0, 1, 0), uses = -1, enabled = False):
         super().__init__("Advancing Rune", position, size=2, uses=uses, enabled=enabled)
         self.color = color.hsv(0, 0.5, 1)
-        
+
         if self.enabled:
             self.sound = Audio('audio/runes/advancing_rune.mp3', autoplay=True, loop=True)
 
     def action(self, dt):
-        global wave_num, items, enemies, runes, game_won, screen_fade_animation, advancing_rune
+        global wave_num, items, enemies, runes, game_won, screen_fade_animation
         if self.scale.xz != Vec2(2):
             return
+        
         wave_num += 1
         if wave_num-1 < len(waves):
             for item in waves[wave_num-1]["items"]:
@@ -1226,22 +1230,22 @@ class AdvancingRune(Rune):
             for rune in waves[wave_num-1]["runes"]:
                 runes.append(duplicate(rune, enabled=True))
 
-            destroy(advancing_rune)
-            advancing_rune = None
+            self.uses = 0
         else:
             game_won = True
             screen_fade_animation = 1
     
     def update_rune(self, dt):
-        super().update_rune(dt)
         # Dynamically pan left or right based on x-position relative to camera
         # Clamp the balance between -1 (left) and 1 (right)
         panning = (self.x - camera.x) / 10
         self.sound.balance = clamp(panning, -1, 1)
-        
+
         # reduce volume with distance
         distance = distance_xz(self.position, camera.position)
         self.sound.volume = clamp(1 / (1 + distance * 0.05), 0, 1)
+        super().update_rune(dt)
+
 
 # -----------------------------
 # Attack effect
@@ -1380,7 +1384,7 @@ items: list[Item] = []
 runes: list[Rune] = []
 
 waves: list[dict[str, list[Item] | list[Enemy]]] = []
-advancing_rune = None
+waiting_to_advance = False
 
 for wave_num in range(10):
     waves.append({"items": [], "enemies": [], "runes": []})
@@ -1409,7 +1413,7 @@ game_over = game_won = False
 ground.fade_in(1, duration=3)
 
 def update():
-    global screen_shift_strength, screen_fade_animation, void_noise_timer, advancing_rune
+    global screen_shift_strength, screen_fade_animation, void_noise_timer
     global game_won, dialog_timer, dialog_text, dialog_id, skip_to_dialog_id
 
     dt = time.dt
@@ -1522,8 +1526,9 @@ def update():
         
     for rune in runes:
         rune.update_rune(dt)
-
-    if alive_enemies == 0 and dialog_id > 3 and advancing_rune == None and not tutorial.enabled:
-        advancing_rune = AdvancingRune(enabled=True)
+        
+    if alive_enemies == 0 and dialog_id > 3 and not waiting_to_advance and not tutorial.enabled:
+        runes.append(AdvancingRune(enabled=True))
+        waiting_to_advance = True
 
 app.run()

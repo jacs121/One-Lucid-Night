@@ -72,6 +72,8 @@ runes: `randomly spreading powerful actionable power ups`
 
 *  add a enemy killed and enemies counter
 *  add a model to the maine enemy
+*  check if runes are fixed
+*  make Staticons ignore eye sight when reloading
 
 ### ISSUES:
 
