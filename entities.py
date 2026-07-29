@@ -1,0 +1,509 @@
+from util import *
+
+class Player(Entity):
+    def __init__(self, speed: int = 2.5, view_cone_range: int = 90, max_health: int = 100):
+        super().__init__(
+            model="models/player.glb",
+            rotation=(0,0,0),
+            y=0.3,
+            unlit=True,
+            shader=triplanar_shader
+        )
+    
+        self.speed = speed
+        self.max_health = self.health = max_health
+        self.view_cone_half_angle = view_cone_range / 2
+        self.set_shader_input(
+            "texture_scale",
+            self.texture_scale
+        )
+        self.set_shader_input(
+            "position",
+            self.texture_offset
+        )
+        char = self.model.find("**/+Character").node()
+        part_bundle = char.getBundle(0)
+
+        self.shotgun_ready = True
+        self.shotgun_pumping = False
+        self.can_move = False
+        self.pump_progress = 0.0
+        self.last_mouse_x = mouse.x
+        self.last_mouse_y = mouse.y
+        self.direction = Vec3(0)
+        self.waving_mora = 0 # not yet made to do anything
+
+        self.shotgun_ammo_count = 0
+        self.ammo_packets_count = 0
+        self.reloading = False
+        self.reload_step = 0
+
+        self.shotgun_recoil = 0.0
+        self.pump_back_amount = 0.0
+        self.camera_shake = 0.0
+
+        # Stroke tracking: which way the mouse is currently moving, and how far
+        self.pump_stroke_dir = 0          # +1, -1, or 0 (no stroke in progress)
+        self.pump_stroke_dist = 0.0       # distance traveled in the current stroke
+        self.pump_strokes = 0
+
+        self.anim_controls = {}
+
+        for node in self.model.findAllMatches("**/+AnimBundleNode"):
+            bundle = node.node().getBundle()
+
+            control = part_bundle.bindAnim(
+                bundle,
+                part_bundle.HMF_ok_anim_extra |
+                part_bundle.HMF_ok_part_extra |
+                part_bundle.HMF_ok_wrong_root_name,
+                PartSubset(),
+            )
+            self.anim_controls[bundle.getName()] = control
+
+        self.anim_controls["idle"].play()
+        self.prev_frame_num = -1
+        self.animation = "idle"
+        if self.enabled:
+            print("player initialized:")
+            print("    model:", self.model)
+            print("    available animation:")
+            print("\n        "+"\n        ".join(self.anim_controls.keys()))
+            print("    animation:", self.animation)
+    
+    def update_player(self, dt):
+        self.update_shotgun(dt)
+        
+        # rotation always tracks the mouse so the crosshair lines up with the aim
+        rad = -math.radians(self.rotation_y)
+        if self.shotgun_ready:
+            self.rotation_y = math.degrees(
+                math.atan2(-mouse.y, mouse.x)
+            )
+            self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
+        
+        # movement
+        if not self.reloading:
+            self.move_input = Vec3(
+                (held_keys['d'] or held_keys["right arrow"]) - (held_keys['a'] or held_keys["left arrow"]),
+                0,
+                (held_keys['w'] or held_keys["up arrow"]) - (held_keys['s'] or held_keys["down arrow"])
+            )
+            if self.move_input.length() and self.can_move:
+                self.move_input = self.move_input.normalized()
+                movement = Vec3(
+                    self.move_input.x * math.sin(rad) +
+                    self.move_input.z * math.cos(rad),
+                    0,
+                    self.move_input.x * math.cos(rad) +
+                    self.move_input.z * math.sin(rad)
+                )
+                if self.move_input.x == -1 and not self.anim_controls["right"].playing:
+                    self.anim_controls["right"].play()
+                    self.animation = "right"
+                elif self.move_input.x == 1 and not self.anim_controls["left"].playing:
+                    self.anim_controls["left"].play()
+                    self.animation = "left"
+                elif self.move_input.z == 1 and not self.anim_controls["forwards"].playing:
+                    self.anim_controls["forwards"].play()
+                    self.animation = "forwards"
+                elif self.move_input.z == -1 and not self.anim_controls["backwards"].playing:
+                    self.anim_controls["backwards"].play()
+                    self.animation = "backwards"
+
+                if self.prev_frame_num != self.anim_controls[self.animation].getFrame() and self.anim_controls[self.animation].getFrame() % (self.anim_controls[self.animation].getNumFrames()//2) == 5:
+                    Audio(Path("audio/step.mp3"))
+
+                self.prev_frame_num = self.anim_controls[self.animation].getFrame()
+                self.position += movement * (self.speed * (2 if held_keys["left shift"] else 1)) * dt
+                self.position = Vec3(clamp(self.position.x, BOUNDARY_REGION[0], BOUNDARY_REGION[2]), 0.3, clamp(self.position.z, BOUNDARY_REGION[1], BOUNDARY_REGION[3]))
+            elif not self.anim_controls["idle"].playing:
+                self.animation = "idle"
+                self.anim_controls["idle"].play()
+                self.prev_frame_num = -1
+            
+            if self.animation != "idle":
+                if held_keys["left shift"]:
+                    self.anim_controls[self.animation].setPlayRate(2)
+                else:
+                    self.anim_controls[self.animation].setPlayRate(1)
+            
+        # Camera follow with shake
+        if self.camera_shake > 0:
+            self.camera_shake -= dt * 3
+            shake = max(0, self.camera_shake) * 0.15
+            camera.position = (
+                self.x + random.uniform(-shake, shake),
+                camera.y,
+                self.z + random.uniform(-shake, shake)
+            )
+        else:
+            camera.position = (self.x, camera.y, self.z)
+
+    def shoot(self):
+        """Fire the shotgun. Each bullets is ray-cast and checked against the entity."""
+        if not self.shotgun_ready:
+            return
+        
+        self.shotgun_ready = False
+        self.shotgun_pumping = True
+        self.pump_progress = 0
+        self.shotgun_recoil = 1.0
+        self.camera_shake = 0.4
+        self.pump_stroke_dir = 0
+        self.pump_stroke_dist = 0.0
+        self.pump_strokes = 0
+        self.shotgun_ammo_count -= 1
+        Audio(Path("audio/shotgun/clink.mp3"))
+        
+        # ----- bullets hit detection with spread ----------------------------
+        bullets_hit: dict[Entity, float] = {}
+        player_angle = - math.radians(self.rotation_y)
+        player_dir = Vec3(math.cos(player_angle), 0, math.sin(player_angle))
+        for _ in range(SHOTGUN_PELLET_COUNT):
+            # random angle inside the spread cone
+            spread = random.uniform(-SHOTGUN_SPREAD, SHOTGUN_SPREAD)/(1 + 0.5*(self.move_input.length() == 0 and not held_keys["left shift"]))
+            bullets_angle = - math.radians(self.rotation_y+spread)
+
+            # bullets direction in world space (matches the forward vector formula)
+            dir_x =  math.cos(bullets_angle)
+            dir_z =  math.sin(bullets_angle)
+
+            hit = False
+            for entity in enemies:
+                # vector from this to enemies
+                dx = entity.x - self.x
+                dz = entity.z - self.z
+                
+                # project the entity onto the bullets ray -- t is the distance along the ray
+                t = dx * dir_x + dz * dir_z-1
+                
+                if 0 < t < SHOTGUN_RANGE:
+                    # closest point on the ray to the entity center
+                    closest_x = self.x + t * dir_x
+                    closest_z = self.z + t * dir_z
+                    
+                    # World-space offset from entity center
+                    ox = closest_x - entity.x
+                    oz = closest_z - entity.z
+
+                    # Rotate into entity local space
+                    angle = - math.radians(entity.rotation_y)
+                    c = cos(angle)
+                    s = sin(angle)
+                    local_x = ox * c - oz * s
+                    local_z = ox * s + oz * c
+
+                    # Half extents of the hitbox
+                    half_x = entity.scale.x * 2
+                    half_z = entity.scale.z * 2
+
+                    if abs(local_x) <= half_x and abs(local_z) <= half_z:
+                        if (t <= 1.5):
+                            rangeMultiplier = 1.0
+                        else:
+                            rangeMultiplier = max(0.0, 1.0 - ((t - 1.5) / 23.5))
+
+                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (25/SHOTGUN_PELLET_COUNT * rangeMultiplier * random.uniform(0.95, 1.05))
+                        hit = True
+                        ray = Entity(
+                            model='quad',
+                            scale=(0.05, t),
+                            position=self.position+player_dir/2,
+                            rotation=(90, self.rotation_y+90+spread, 0),
+                            origin=(0, -.5),
+                            color=color.red,
+                        )
+                        ray.fade_out(0, 1)
+                        destroy(ray, 1)
+                        continue
+
+            if not hit:
+                ray = Entity(
+                    model='quad',
+                    scale=(0.05, SHOTGUN_RANGE),
+                    position=self.position+player_dir/2,
+                    rotation=(90, self.rotation_y+90+spread, 0),
+                    origin=(0, -0.5),
+                    color=color.red
+                )
+                ray.fade_out(0, 1)
+                destroy(ray, 1)
+
+        for entity, damage in bullets_hit.items():
+            entity.damage(damage)
+
+    def update_shotgun(self, dt):
+        # --- Pump: each reversal is one "stroke", need 2 to strokes ---
+        if self.shotgun_pumping:
+            pump_bar_bg.enable()
+            pump_bar_fill.enable()
+            if self.pump_strokes >= PUMP_STROKES_NEEDED:
+                self.shotgun_ready = True
+                self.shotgun_pumping = False
+                self.pump_back_amount = 0
+                Audio("audio/shotgun/pump_forth.mp3")
+        if self.shotgun_pumping:
+            angle = math.radians(self.rotation_y)
+
+            # Direction the shotgun is pointing
+            aim_dir = Vec2(
+                cos(angle),
+                - sin(angle)
+            )
+
+            # How much mouse movement happened along the shotgun direction
+            mouse_delta = (mouse.x - self.last_mouse_x) * aim_dir.x + (mouse.y - self.last_mouse_y) * aim_dir.y
+            if abs(mouse_delta) > 0.0001:
+                current_dir = 1 if mouse_delta > 0 else -1
+                if self.pump_stroke_dir == 0 and current_dir == -1:
+                    # First motion -- just start tracking
+                    self.pump_stroke_dir = current_dir
+                    self.pump_stroke_dist = abs(mouse_delta)
+                if current_dir == self.pump_stroke_dir:
+                    # Same direction, keep accumulating this stroke until it gets 
+                    self.pump_stroke_dist += abs(mouse_delta)
+                    if self.pump_stroke_dist > PUMP_TARGET/(2-self.pump_strokes):
+                        Audio("audio/shotgun/pump_back.mp3")
+                        self.pump_stroke_dist = PUMP_TARGET/(2-self.pump_strokes)
+                        self.pump_stroke_dir *= -1
+                        self.pump_strokes += 1
+
+            self.pump_progress = clamp(self.pump_stroke_dist/PUMP_TARGET, 0, 1)
+        else:
+            self.pump_stroke_dir = 0
+            self.pump_stroke_dist = 0
+            self.pump_back_amount = 0
+
+            pump_bar_bg.disable()
+            pump_bar_fill.disable()
+
+        # Apply recoil + pump to the model
+        angle = math.radians(self.rotation_z)
+
+        # Direction shotgun is pointing
+        aim_dir = Vec2(
+            cos(angle),
+            sin(angle)
+        )
+
+        # Recoil pushes backward (opposite aim)
+        self.shotgun_recoil = max(0, self.shotgun_recoil - dt * 6)
+        recoil_offset = -aim_dir * self.shotgun_recoil * 0.12
+
+        # Pump moves along the shotgun direction
+        pump_offset = -aim_dir * (1 - abs(2*self.pump_progress - 1)) * 0.25
+        
+        shotgun.position = (
+            recoil_offset.x,
+            shotgun.y,
+            recoil_offset.y,
+        )
+        shotgun_pump.position = (
+            pump_offset.x + recoil_offset.x,
+            shotgun_pump.y,
+            pump_offset.y + recoil_offset.y
+        )
+
+        # Pump bar and crosshair
+        if self.shotgun_pumping:
+            if update_crosshair == True:
+                crosshair.color = color.rgb32(255, 0, 0)
+            crosshair_ring.color = color.rgb32(255, 0, 0)
+            
+            crosshair.position = (mouse.x, mouse.y, -2)
+            
+            fill = self.pump_progress
+            pump_bar_fill.scale_x = (fill - 0.01) / 2
+            pump_bar_fill.x = 0
+            pump_bar_fill.color = color.rgba32(255, 200, 50, 220)
+        elif self.shotgun_ready:
+            if update_crosshair == True:
+                crosshair.color = color.rgb32(200, 200, 200)
+                crosshair_ring.color = color.rgb32(200, 200, 200)
+            
+            crosshair.position = (mouse.x, mouse.y, -1)
+            crosshair_ring.position = (mouse.x, mouse.y, -2)
+            
+            pump_bar_fill.scale_x = 0.49
+            pump_bar_fill.x = 0
+            pump_bar_fill.color = color.rgba32(80, 220, 80, 220)
+        else:
+            pump_bar_fill.scale_x = 0.49
+            pump_bar_fill.x = 0
+            pump_bar_fill.color = color.rgba32(100, 100, 100, 100)
+
+        self.last_mouse_x = mouse.x
+        self.last_mouse_y = mouse.y
+
+player = Player()
+
+reload_image = Entity(
+    parent=camera.ui,
+    model='quad',
+    texture='textures/reloading/get_bullet.png',
+    scale=(87/100, 13/100),      # Adjust to your image size
+    position=(0, 0),        # Center of the screen
+    color=color.white,
+    enabled=False
+)
+
+# Shotgun model -- parented to player, lies flat, points in +x (player forward)
+shotgun = Entity(
+    parent=player,
+    model='quad',
+    texture="textures/shotgun.png",
+    scale=(1.125, 0.125),
+    position=(0, 1.512, 0),    # 0.5 in front of player center
+    rotation=(90, 0, 0),         # lay flat so it's visible from the top-down camera
+    unlit=True,
+    enabled=False
+)
+
+def reposition():
+    shotgun_ammo_ui.x = -window.aspect_ratio / 2 + .02
+    ammo_packets_count_ui.x = -window.aspect_ratio / 2 + .02
+    tutorial.x = -window.aspect_ratio / 2 + .02
+
+class ShowDialog(Entity):
+    def __init__(self, text: str = "", dialog_speed: float = 1/15):
+        super().__init__()
+        self.label = Text(
+            origin=(0, -0.5),
+            position=(0, -0.475)
+        )
+        
+        self.dialog_text = text
+        self.dialog_speed = dialog_speed
+        self.dialog_timer = 0
+
+    def update(self):
+        dt = time.dt
+        if self.dialog_timer < len(self.dialog_text) + 2/self.dialog_speed:
+            self.dialog_timer += dt/self.dialog_speed
+            # if int(self.dialog_timer) == int(self.dialog_timer - dt/self.dialog_speed):
+            #     Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True)
+            self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
+            player.can_move = (self.dialog_timer >= len(self.dialog_text))
+        else:
+            player.can_move = True
+            self.dialog_callback()
+            
+            destroy(self.label)
+            destroy(self)
+
+    def input(self, key):
+        if key == "enter" and self.dialog_timer < len(self.dialog_text):
+            self.dialog_timer = len(self.dialog_text) + 1/self.dialog_speed
+        elif key == "enter" and self.dialog_timer >= len(self.dialog_text):
+            self.dialog_timer = len(self.dialog_text) + 2/self.dialog_speed
+    
+    def dialog_callback(self):
+        pass
+
+player.can_move = False
+
+tutorial = Text(
+    text="",
+    color=color.yellow,
+    origin=(-0.5, -0.5),
+    position=(-0.5, -0.475),
+)
+
+shotgun_ammo_ui = Text(
+    text="AMMO: 0/0",
+    color=color.orange if player.shotgun_ammo_count > 0 else color.red,
+    origin=(-0.5, 0.5),
+    position=(-0.5, 0.45),
+    enabled=False
+)
+
+ammo_packets_count_ui = Text(
+    text=f"{player.ammo_packets_count} MAGAZINES" if player.ammo_packets_count > 0 else "[OUT OF MAGAZINES]",
+    color=color.orange if player.ammo_packets_count > 0 else color.red,
+    origin=(-0.5, 0.5),
+    position=(-0.5, 0.475),
+    enabled=False
+)
+
+window.on_window_resize = reposition
+reposition()
+
+shotgun_pump = Entity(
+    parent=player,
+    model='quad',
+    texture="textures/shotgun_pump.png",
+    scale=(1.125, 0.125),
+    position=(0, 1.512, 0),
+    rotation=(90, 0, 0),
+    unlit=True,
+    enabled=False
+)
+
+# Crosshair (center dot)
+crosshair = Entity(
+    parent=camera.ui,
+    model='quad',
+    texture="textures/crosshair.png",
+    color=color.rgba32(255, 60, 60, 220),
+    scale=(0.05, 0.05),
+    z=-1,
+    enabled=False
+)
+
+# Crosshair ring (slightly larger, dimmer)
+crosshair_ring = Entity(
+    parent=camera.ui,
+    model='quad',
+    texture="textures/crosshair_ring.png",
+    color=color.rgba32(255, 60, 60, 80),
+    scale=(0.05, 0.05),
+    z=-2,
+    enabled=False
+)
+
+update_crosshair = False
+
+# Pump progress bar background (bottom of screen)
+pump_bar_bg = Entity(
+    parent=camera.ui,
+    model='quad',
+    color=color.rgba32(0, 0, 0, 130),
+    scale=(0.5, 0.022),
+    position=(0, -0.45),
+    z=-1,
+    enabled=False
+)
+
+# Pump progress bar fill
+pump_bar_fill = Entity(
+    parent=camera.ui,
+    model='quad',
+    color=color.rgba32(255, 200, 50, 220),
+    scale=(0.0, 0.018),
+    position=(0.0, -0.45),
+    z=-2,
+    enabled=False
+)
+
+#? other enemy ideas:
+# - Diatom: if you look at him he will slowly born you
+# health: 20
+
+screen_shift_strength = 0
+screen_fade_animation = 0
+screen_shift = Entity(
+    parent=camera.ui,
+    model='quad',
+    scale=2,
+    color=color.rgba(1, 0, 0, 0),
+    z=10
+)
+
+win_text = Text(
+    parent=camera.ui,
+    text="",
+    color=color.rgba(0.5, 0, 0, 0),
+    position=(-0.2,0),
+    scale=1
+)

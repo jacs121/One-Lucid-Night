@@ -9,6 +9,8 @@ patterns = [
     "models/**/*",
     "textures/**/*",
     "audio/**/*",
+    "*.py",
+    "*.json"
 ]
 
 script = "main.py"
