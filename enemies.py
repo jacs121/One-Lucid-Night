@@ -190,7 +190,7 @@ class Staticon(Enemy):
                         clamp(forward.dot(direction), -1, 1)
                     )
                 )
-                if angle > player.view_cone_half_angle or self.awareness_range > dist > self.awareness_range/1.5:
+                if angle > player.view_cone_half_angle or player.reloading or self.awareness_range > dist > self.awareness_range/1.5:
                     target_rotation_y = math.degrees(math.atan2(direction.x, direction.z))
                     self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     
@@ -199,7 +199,7 @@ class Staticon(Enemy):
                             self.anim_controls["attack"].play()
                     else:
                         self.position -= direction * min(
-                            self.speed * dt * self.scale.length(),
+                            self.speed * dt * self.scale.length() * (1 - 0.5 * int(player.reloading)),
                             dist
                         )
                         self.is_moving = True
@@ -297,7 +297,7 @@ class Obeliskus(Enemy):
                             )
                             
                             self.position += forward * min(
-                                self.speed * dt * self.scale.length() * (self.health/self.max_health),
+                                self.speed * dt * self.scale.length() * (self.health/self.max_health) * (1 - 0.5 * int(player.reloading)),
                                 dist
                             )
             dx = player.x - self.x
@@ -403,7 +403,7 @@ class Maime(Enemy):
                             self.anim_controls["attack"].play()
                     else:
                         self.position -= direction * min(
-                            self.speed * dt * self.scale.length(),
+                            self.speed * dt * self.scale.length() * (1 - 0.5 * int(player.reloading)),
                             dist
                         )
 

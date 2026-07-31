@@ -2,10 +2,6 @@ from imports import *
 
 app = Ursina()
 
-# -----------------------------
-# Texture generation
-# -----------------------------
-
 def generate_noise_texture(seed: str, width=512, height=512):
     data = seed.encode('utf-8')
     raw = list(hashlib.shake_256(data).digest(width * height))
@@ -35,7 +31,6 @@ def generate_triangle_texture(seed: str, width=512, height=512):
         p2 = tuple(all_points[simplex[1]])
         p3 = tuple(all_points[simplex[2]])
 
-        # Random RGB color
         color = (
             random.randint(0, 255),
             random.randint(0, 255),
@@ -106,17 +101,13 @@ camera.rotation = (90, 0, 0)
 camera.orthographic = True
 camera.fov = 16
 
-# Tunables ---------------------------------------------------------------
-
-SHOTGUN_PELLET_COUNT = 7        # bullets per shot
-SHOTGUN_MAX_AMMO_COUNT = 8      # bullets per reload
-SHOTGUN_SPREAD = 12             # half-cone spread in degrees
-SHOTGUN_RANGE = 18              # max effective range
-
-# Back-and-forth pump tuning
-PUMP_TARGET = 0.75        # total stroke distance to fully pump
-PUMP_MIN_STROKE = 0.15      # only here to filter literal pixel jitter
-PUMP_STROKES_NEEDED = 2      # 2 reversals = 1 back-and-forths
+SHOTGUN_PELLET_COUNT = 7
+SHOTGUN_MAX_AMMO_COUNT = 8
+SHOTGUN_SPREAD = 12
+SHOTGUN_RANGE = 18
+PUMP_TARGET = 0.75
+PUMP_MIN_STROKE = 0.15
+PUMP_STROKES_NEEDED = 2
 
 waves: list[dict[str, list]] = []
 waiting_to_advance = False

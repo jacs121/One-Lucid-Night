@@ -16,10 +16,6 @@ from items import *
 from enemies import *
 from runes import *
 
-# -----------------------------
-# World
-# -----------------------------
-
 def input(key):
     global enemies, tutorial_ended, main_menu
     if main_menu:
@@ -109,10 +105,6 @@ def input(key):
             enemies.append(Staticon((15, 0.3, 15), enabled=True))
             tutorial.disable()
             tutorial_ended = True
-
-# -----------------------------
-# Main update
-# -----------------------------
 
 def power_lerp(x, a=1):
     return 1-math.log(math.cosh((1-2*x)/a))+math.log(math.cosh(1/a))-1

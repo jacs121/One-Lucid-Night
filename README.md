@@ -40,12 +40,16 @@ runes: `randomly spreading powerful actionable power ups`
 
 <details>
   <summary>reveal enemies</summary>
-  
+
   Staticons: `a mix of a spider and a chameleon these enemies have a similar skin to the ground and thought moves when they move, looking straight at them will make them stop in place`
 
   Obeliskuses: `a very fast whale like enemy that will hume at you and move very fast until shot each will stop them for some time and make them slower`
 
   Maime (WIP, not yet spawnable): `small little creatures that disguise themselves has items, though are distinctive by having a slower passive animation`
+
+  Diatum (future implementation): `slows you down and hurts you if you look at it`
+
+  Feeterlug (future implementation): `walking on makes you unable to move or shoot any other enemies except it, you need to kill it and you cannot`
 </details>
 
 <details>
@@ -71,9 +75,8 @@ runes: `randomly spreading powerful actionable power ups`
 ### TODO LIST:
 
 *  add a enemy killed and enemies counter
-*  add a model to the maine enemy
 *  check if runes are fixed
-*  make Staticons ignore eye sight when reloading
+* create the default wave progression
 
 ### ISSUES:
 
