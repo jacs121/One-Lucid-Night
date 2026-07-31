@@ -15,6 +15,37 @@ def generate_noise_texture(seed: str, width=512, height=512):
     )
     return Texture(img)
 
+def generate_triangle_texture(seed: str, width=512, height=512):
+    data = seed.encode('utf-8')
+    seed = hashlib.sha512(data).digest().decode()
+    random = np.random.RandomState(seed)
+    
+    num_points = 150
+    points = random.rand(num_points, 2) * [width - 24, height - 24]
+    corners = np.array([[0, 0], [width, 0], [0, height], [width, height]])
+    all_points = np.vstack([points, corners])
+
+    tri = Delaunay(all_points)
+
+    image = Image.new("RGB", (width, height))
+    draw = ImageDraw.Draw(image)
+
+    for simplex in tri.simplices:
+        p1 = tuple(all_points[simplex[0]])
+        p2 = tuple(all_points[simplex[1]])
+        p3 = tuple(all_points[simplex[2]])
+
+        # Random RGB color
+        color = (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+        )
+        draw.polygon([p1, p2, p3], fill=color)
+    
+    return Texture(draw)
+
+
 GROUND_NOISE_SCALE = 3.5
 
 BOUNDARY_REGION = (-25, -25, 25, 25)
@@ -96,3 +127,5 @@ game_over = game_won = tutorial_ended = False
 enemies: list = []
 items: list = []
 runes: list = []
+
+main_menu = True

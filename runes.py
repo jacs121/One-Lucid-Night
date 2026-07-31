@@ -85,14 +85,16 @@ class AdvancingRune(Rune):
         
         wave_num += 1
         if wave_num-1 < len(waves):
-            for item in waves[wave_num-1]["items"]:
-                items.append(duplicate(item, enabled=True))
+            for itemData in waves[wave_num-1]["items"]:
+                items.append(duplicate(itemData.pop("item")(**itemData), enabled=True))
 
-            for enemy in waves[wave_num-1]["enemies"]:
-                enemies.append(duplicate(enemy, enabled=True))
+            for enemyData in waves[wave_num-1]["enemies"]:
+                if "item" in enemyData.keys():
+                    enemyData["item"] = enemyData["item"].pop("entity")(**enemyData["item"])
+                enemies.append(duplicate(enemyData.pop("enemy")(**enemyData), enabled=True))
 
-            for rune in waves[wave_num-1]["runes"]:
-                runes.append(duplicate(rune, enabled=True))
+            for runeData in waves[wave_num-1]["runes"]:
+                runes.append(duplicate(runeData.pop("runes")(**runeData), enabled=True))
         else:
             game_won = True
             screen_fade_animation = 1

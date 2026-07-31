@@ -31,6 +31,24 @@ class Enemy(Entity):
             "texture_scale",
             self.texture_scale
         )
+        
+        char = self.model.find("**/+Character").node()
+        part_bundle = char.getBundle(0)
+
+        self.anim_controls = {}
+
+        for node in self.model.findAllMatches("**/+AnimBundleNode"):
+            bundle = node.node().getBundle()
+
+            control = part_bundle.bindAnim(
+                bundle,
+                part_bundle.HMF_ok_anim_extra |
+                part_bundle.HMF_ok_part_extra |
+                part_bundle.HMF_ok_wrong_root_name,
+                PartSubset(),
+            )
+
+            self.anim_controls[bundle.getName()] = control
 
     def update_entity(self, dt):
         pass
@@ -70,7 +88,7 @@ class Staticon(Enemy):
         self.speed=speed
         self.ai_active = ai_active
         self.base_color = base_color
-        self.texture = generate_noise_texture("hidden_entity_"+str(random.randint(0,1000000)))
+        self.texture = generate_noise_texture("staticon_"+str(random.randint(0,1000000)))
 
         self.set_shader_input(
             "texture_scale",
@@ -85,24 +103,6 @@ class Staticon(Enemy):
         self.attack_range = attack_range
         self.awareness_range = awareness_range
 
-        char = self.model.find("**/+Character").node()
-        part_bundle = char.getBundle(0)
-
-        self.anim_controls = {}
-
-        for node in self.model.findAllMatches("**/+AnimBundleNode"):
-            bundle = node.node().getBundle()
-
-            control = part_bundle.bindAnim(
-                bundle,
-                part_bundle.HMF_ok_anim_extra |
-                part_bundle.HMF_ok_part_extra |
-                part_bundle.HMF_ok_wrong_root_name,
-                PartSubset(),
-            )
-
-            self.anim_controls[bundle.getName()] = control
-    
         self.anim_controls["attack"].setPlayRate(0.75)
         self.anim_controls["walking"].setPlayRate(2)
         self.anim_controls["idle"].play()
@@ -164,7 +164,7 @@ class Staticon(Enemy):
                 lerp(self.health/self.max_health, self.base_color.v, 1-self.damage_flash),
             )
             
-            self.texture = generate_noise_texture("hidden_entity_"+str(random.randint(0,1000000)))
+            self.texture = generate_noise_texture("staticon_"+str(random.randint(0,1000000)))
         elif self.health != 0:
             self.damage_flash = 0
             self.color = self.base_color
@@ -225,32 +225,13 @@ class Obeliskus(Enemy):
             max_health=max_health,
             enabled=enabled
         )
-        
-        char = self.model.find("**/+Character").node()
-        part_bundle = char.getBundle(0)
-
-        self.anim_controls = {}
-
-        for node in self.model.findAllMatches("**/+AnimBundleNode"):
-            bundle = node.node().getBundle()
-
-            control = part_bundle.bindAnim(
-                bundle,
-                part_bundle.HMF_ok_anim_extra |
-                part_bundle.HMF_ok_part_extra |
-                part_bundle.HMF_ok_wrong_root_name,
-                PartSubset(),
-            )
-
-            self.anim_controls[bundle.getName()] = control
 
         self.ai_active = ai_active
         self.speed=speed
         self.attack_range = attack_range
         self.awareness_range = awareness_range
         self.attacked_timer = 0
-        self.anim_controls["hit"].setPlayRate(0.5)
-        self.anim_controls["idle"].play()
+        self.attacking_timer = 0
         
         if self.enabled:
             print("a obeliskus has been summoned:")
@@ -296,64 +277,54 @@ class Obeliskus(Enemy):
             )
             dist = max(to_self.length() - self.scale.length() / 2, 0)
             if self.awareness_range > dist:
-                direction = to_self.normalized()
                 if self.attacked_timer <= 0:
                     target_rotation_y = math.degrees(math.atan2(to_self.x, to_self.z))
                     angle_diff = abs(((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180)
                     if angle_diff > 4:
-                        print(angle_diff)
                         self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     else:
                         if dist <= self.attack_range*self.scale.length():
-                            if not self.anim_controls["bite"].is_playing():
+                            if self.attacking_timer <= 0:
                                 self.anim_controls["bite"].play()
+                                self.attacking_timer = 2.5
+                            else:
+                                self.attacking_timer -= dt
                         else:
-                            self.position -= direction * min(
+                            forward = Vec3(
+                                math.cos(-math.radians(self.rotation_y)),
+                                0,
+                                math.sin(-math.radians(self.rotation_y))
+                            )
+                            
+                            self.position += forward * min(
                                 self.speed * dt * self.scale.length() * (self.health/self.max_health),
                                 dist
                             )
-
-                            if not self.anim_controls["move"].is_playing():
-                                self.anim_controls["move"].play()
-
-            if self.attack_range*self.scale.length() < dist:
-                if self.anim_controls["bite"].get_frame() < 15:
-                    self.anim_controls["bite"].stop()
-                
-                elif 15 < self.anim_controls["bite"].get_frame() < 27:
-                    self.anim_controls["bite"].stop()
-
-                elif 27 < self.anim_controls["bite"].get_frame() < 41:
-                    self.anim_controls["bite"].stop()
-
-                if self.anim_controls["bite"].get_frame() in [15, 27, 41]:
-                    self.attack(5)
-
             dx = player.x - self.x
             dz = player.z - self.z
 
             target_rotation_y = math.degrees(math.atan2(dx, dz))
             angle_diff = ((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180
 
-            if (dist <= 1 or self.attacked_timer > 0) and not self.anim_controls["bite"].is_playing() or angle_diff > 4:
-                self.anim_controls["idle"].play()
+    def update_texture(self):
+        self.texture = generate_triangle_texture("obeliskus_"+str(int(self.position.x))+"_"+str(int(self.position.z)))
 
     def damage(self, damage):
         if super().damage(damage) != "":
             self.attacked_timer = 6 + self.attacked_timer/3
-            self.anim_controls["hit"].setPlayRate(0.5*self.health/self.max_health)
 
 class Maime(Enemy):
     def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False, enabled: bool = False):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(
-            item.model,
+            model="models/maime.glb",
             position=item.position,
             scale=item.scale,
             max_health=max_health,
             enabled=enabled
         )
         
+        self.model = item.model
         self.health = max_health
         self.awareness_range = awareness_range
         self.size = size
@@ -376,11 +347,11 @@ class Maime(Enemy):
         if self.enabled:
             print("a maime has been summoned:")
             print("    item disguised:", self.model)
-            print("        MODEL:", self.itemData[0])
+            print("        MODEL: item/", item.label.text.lower().replace(" ", "_"))
             print("        SCALE:", self.itemData[1])
-            # print("    available animation:")
-            # print("\n        ".join(self.anim_controls.keys()).upper())
-            # print("    animation:", "idle")
+            print("    available animation:")
+            print("\n        ".join(self.anim_controls.keys()).upper())
+            print("    animation:", "idle")
             print("    stats:")
             print("        SPEED:", self.speed)
             print("        SIZE:", self.scale.length())
@@ -423,17 +394,30 @@ class Maime(Enemy):
                     0,
                     self.z - player.z
                 )
+
                 dist = max(to_self.length() - self.scale.length() / 2, 0)
-                print(dist)
                 direction = to_self.normalized()
                 if dist > 0.05:
                     if dist <= self.attack_range*self.scale.length():
-                        pass
+                        if not self.anim_controls["attack"].is_playing():
+                            self.anim_controls["attack"].play()
                     else:
                         self.position -= direction * min(
                             self.speed * dt * self.scale.length(),
                             dist
                         )
+
+                        if not self.anim_controls["walk"].is_playing():
+                            self.anim_controls["walk"].play()
+                            
+            if self.anim_controls["attack"].get_frame() < 15:
+                self.anim_controls["attack"].stop()
+
+            if self.anim_controls["attack"].get_frame() == 15:
+                self.attack(5)
+
+            if dist <= 1 and not self.anim_controls["attack"].is_playing():
+                self.anim_controls["idle"].play()
 
 def trigger_screen_shift():
     global screen_shift_strength

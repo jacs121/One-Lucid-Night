@@ -7,7 +7,8 @@ class Player(Entity):
             rotation=(0,0,0),
             y=0.3,
             unlit=True,
-            shader=triplanar_shader
+            shader=triplanar_shader,
+            enabled=False
         )
     
         self.speed = speed
@@ -112,7 +113,7 @@ class Player(Entity):
                     self.animation = "backwards"
 
                 if self.prev_frame_num != self.anim_controls[self.animation].getFrame() and self.anim_controls[self.animation].getFrame() % (self.anim_controls[self.animation].getNumFrames()//2) == 5:
-                    Audio(Path("audio/step.mp3"))
+                    Audio("audio/step.mp3", 2)
 
                 self.prev_frame_num = self.anim_controls[self.animation].getFrame()
                 self.position += movement * (self.speed * (2 if held_keys["left shift"] else 1)) * dt
@@ -154,7 +155,7 @@ class Player(Entity):
         self.pump_stroke_dist = 0.0
         self.pump_strokes = 0
         self.shotgun_ammo_count -= 1
-        Audio(Path("audio/shotgun/clink.mp3"))
+        Audio("audio/shotgun/clink.mp3")
         
         # ----- bullets hit detection with spread ----------------------------
         bullets_hit: dict[Entity, float] = {}
@@ -381,12 +382,10 @@ class ShowDialog(Entity):
         dt = time.dt
         if self.dialog_timer < len(self.dialog_text) + 2/self.dialog_speed:
             self.dialog_timer += dt/self.dialog_speed
-            # if int(self.dialog_timer) == int(self.dialog_timer - dt/self.dialog_speed):
-            #     Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True)
-            self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
-            player.can_move = (self.dialog_timer >= len(self.dialog_text))
+            if self.label.text != self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]:
+                Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True)
+                self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
         else:
-            player.can_move = True
             self.dialog_callback()
             
             destroy(self.label)
@@ -400,8 +399,6 @@ class ShowDialog(Entity):
     
     def dialog_callback(self):
         pass
-
-player.can_move = False
 
 tutorial = Text(
     text="",
@@ -506,4 +503,52 @@ win_text = Text(
     color=color.rgba(0.5, 0, 0, 0),
     position=(-0.2,0),
     scale=1
+)
+
+ground = Entity(
+    model='cube',
+    scale=(width, 0, height),
+    shader=triplanar_shader,
+    position=(center_x, center_y),
+    texture=generate_noise_texture("world"),
+    color=color.rgba(0.5,0.5,0.5,0),
+    unlit=True
+)
+
+
+void = Entity(
+    model='plane',
+    texture=generate_noise_texture("void"),
+    scale=200,
+    y=-0.1,
+    texture_scale=(5, 5),
+    color=color.rgb(1, 1, 1, 0),
+    unlit=True
+)
+
+void_fade_in = void.fade_in(1/16, duration=4)
+
+void_noise_timer = 0
+
+
+ground.set_shader_input(
+    "position", Vec2(0)
+)
+
+ground.set_shader_input(
+    "texture_scale", Vec2(0.05)
+)
+
+title_text = Text(
+    text="ONE LUCID NIGHT",
+    origin=(0, -0.35),
+    position=(0, 0.35),
+    scale=5,
+    color=color.red
+)
+
+start_game_text = Text(
+    text="press space to start",
+    origin=(0, -0.45),
+    position=(0, -0.45)
 )

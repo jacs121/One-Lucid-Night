@@ -20,39 +20,15 @@ from runes import *
 # World
 # -----------------------------
 
-ground = Entity(
-    model='cube',
-    scale=(width, 0, height),
-    shader=triplanar_shader,
-    position=(center_x, center_y),
-    texture=generate_noise_texture("world"),
-    color=color.rgba(0.5,0.5,0.5,0),
-    unlit=True,
-)
-
-
-void = Entity(
-    model='plane',
-    texture=generate_noise_texture("void"),
-    scale=200,
-    y=-0.1,
-    texture_scale=(5, 5),
-    color=color.rgb32(16, 16, 16),
-    unlit=True
-)
-
-void_noise_timer = 0
-
-ground.set_shader_input(
-    "position", Vec2(0)
-)
-
-ground.set_shader_input(
-    "texture_scale", Vec2(0.05)
-)
-
 def input(key):
-    global enemies, tutorial_ended
+    global enemies, tutorial_ended, main_menu
+    if main_menu:
+        if key == "space":
+            print("starting game")
+            main_menu = False
+            start_game()
+        return
+
     if not player.reloading and player.enabled:
         if key == 'left mouse down' and player.shotgun_ammo_count > 0:
             player.shoot()
@@ -151,16 +127,16 @@ if os.path.exists(wave_filepath):
     wave_filepath = wave_filepath[2:]
 
 
-def element_number_converter(num) -> list[float]:
-    if isinstance(num, str):
-        return {"l": left, "r": right, "t": top, "b": bottom}[num]
-    elif isinstance(num, dict):
-        minimum = element_number_converter(num["min"])
-        maximum = element_number_converter(num["max"])
+def element_number_converter(value) -> float:
+    if isinstance(value, str):
+        return {"l": left, "r": right, "t": top, "b": bottom}[value]
+    elif isinstance(value, dict):
+        minimum = element_number_converter(value["min"])
+        maximum = element_number_converter(value["max"])
         return random.uniform(minimum, maximum)
-    elif isinstance(num, list):
-        num = [element_number_converter(p) for p in num]
-        return random.choice(num)
+    elif isinstance(value, list):
+        return random.choice([element_number_converter(v) for v in value])
+    return value
 
 waves_data = json.load(open(wave_filepath))
 
@@ -169,16 +145,19 @@ for wave_num, wave_data in enumerate(waves_data):
     for element in wave_data:
         position = (element_number_converter(element["position"][0]), 1, element_number_converter(element["position"][1]))
         if element["type"] == "item":
-            name = random.choice(element["items"])
-            waves[-1]["items"].append(available_items[name](position=position))
+            elementIndex = random.choice(element["items"])
+            waves[-1]["items"].append({"items": available_items[elementIndex], "position": position})
         elif element["type"] == "rune":
-            name = random.choice(element["runes"])
-            waves[-1]["runes"].append(available_runes[name](position=position))
+            elementIndex = random.choice(element["runes"])
+            waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
         elif element["type"] == "enemy":
-            name = random.choice(element["enemies"])
-            waves[-1]["enemies"].append(available_enemies[name](position=position))
-
-ground.fade_in(1, duration=3)
+            elementIndex = random.choice(element["enemies"])
+            
+            kwargs = {"enemy": available_enemies[elementIndex], "position": position}
+            if kwargs["enemy"] == Maime:
+                kwargs["item"] = {"entity": random.choice(available_items), "position": position}
+            
+            waves[-1]["enemies"].append(kwargs)
 
 def dialogCallback3():
     global items
@@ -187,6 +166,7 @@ def dialogCallback3():
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: GO TOUCH THE ITEM"
     items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
+    player.can_move = True
 
 def dialogCallback2():
     crosshair.enabled=True
@@ -210,11 +190,9 @@ def dialogCallback1():
     
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
-def update():
-    global screen_shift_strength, screen_fade_animation, void_noise_timer
+def update_game(dt: float):
+    global screen_shift_strength, screen_fade_animation
     global game_won, waiting_to_advance
-
-    dt = time.dt
 
     if screen_fade_animation > 0:
         screen_fade_animation -= dt/10
@@ -258,11 +236,6 @@ def update():
         player.z
     )
 
-    void_noise_timer += dt
-    if void_noise_timer > 1.5:
-        void_noise_timer = 0
-        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)))
-
     alive_enemies = 0
     for entity in enemies:
         entity.update_entity(dt)
@@ -279,6 +252,26 @@ def update():
         runes.append(AdvancingRune(enabled=True))
         waiting_to_advance = True
 
-ShowDialog("where am I...").dialog_callback = dialogCallback1
+def start_game():
+    Audio("audio/ambient.wav", loop=True)
+    ground.fade_in(1, duration=3)
+    invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
+    void_fade_in.finish()
+    title_text.fade_out()
+    start_game_text.disable()
+    player.enable()
+    player.can_move = False
+
+def update():
+    global void_noise_timer
+    dt = time.dt
+
+    if not main_menu:
+        update_game(dt)
+
+    void_noise_timer += dt
+    if void_noise_timer > 1.5:
+        void_noise_timer = 0
+        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)))
 
 app.run()

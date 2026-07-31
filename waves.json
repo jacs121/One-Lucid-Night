@@ -1,9 +1,9 @@
 [
     [
         {
-            "type": "rune",
-            "runes": [0],
-            "position": [{"min": ""}]
+            "type": "enemy",
+            "enemies": [2],
+            "position": [[{"min": -10, "max": "l"}, {"min": 10, "max": "r"}], [{"min": 10, "max": "t"}, {"min": -10, "max": "b"}]]
         }
     ]
 ]
