@@ -78,32 +78,21 @@ DATA_PAIRS=(
     "util.py:."
     "waves.json:."
 )
+CMD="pyinstaller --noconfirm --onefile --noconsole --name \"one-lucid-night-${PLATFORM}\""
 
-ADD_DATA_ARGS=()
 for pair in "${DATA_PAIRS[@]}"; do
-
     arg="${pair/:/$SEP}"
-    ADD_DATA_ARGS+=( --add-data="$arg" )
+    CMD="$CMD --add-data=\"$arg\""
 done
 
 case "$PLATFORM" in
-    windows)
-        pyinstaller --noconfirm --onefile --noconsole \
-            --name "one-lucid-night-windows" \
-            "${ADD_DATA_ARGS[@]}" \
-            --clean main.py
-        ;;
     linux)
-        pyinstaller --noconfirm --onefile --noconsole \
-            --name "one-lucid-night-linux" \
-            "${ADD_DATA_ARGS[@]}" \
-            --noupx \
-            --clean main.py
-        ;;
-    macos)
-        pyinstaller --noconfirm --onefile --noconsole \
-            --name "one-lucid-night-macos" \
-            "${ADD_DATA_ARGS[@]}" \
-            --clean main.py
+        CMD="$CMD --noupx"
         ;;
 esac
+
+CMD="$CMD --clean main.py"
+
+echo "Running: $CMD"
+
+eval $CMD
