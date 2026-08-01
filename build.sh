@@ -91,8 +91,7 @@ cmd_args=(
 )
 
 for pair in "${DATA_PAIRS[@]}"; do
-    arg="${pair/:/$SEP}"
-    cmd_args+=( "--add-data=\"${arg}\"" )
+    cmd_args+=( --add-data="${pair/:/$SEP}" )
 done
 
 if [ "$PLATFORM" = "linux" ]; then
