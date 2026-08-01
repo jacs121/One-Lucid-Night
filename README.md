@@ -76,7 +76,17 @@ runes: `randomly spreading powerful actionable power ups`
 
 *  add a enemy killed and enemies counter
 *  check if runes are fixed
-* create the default wave progression
+*  create the default wave progression
+
+<details>
+  <summary>other things that need improvements</summary>
+
+  Get enemies/monsters to spawn at random locations
+  have them move towards the players
+  make the mechanic for gaining XP/levels
+  make how the game progresses until the end
+  Worry about game design later
+</details>
 
 ### ISSUES:
 

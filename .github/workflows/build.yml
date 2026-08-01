@@ -22,21 +22,13 @@ jobs:
       
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       
       - name: Build (Windows)
         if: matrix.os == 'windows-latest'
         shell: bash
-        run: bash build.sh windows
-      
-      - name: Build (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: bash build.sh linux
-      
-      - name: Build (macOS)
-        if: matrix.os == 'macos-latest'
-        run: bash build.sh macos
-      
+        run: py build.py
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
