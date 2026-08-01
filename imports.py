@@ -1,4 +1,5 @@
 import math
+import sys
 import random
 import json
 from PIL import Image, ImageDraw

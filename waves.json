@@ -22,7 +22,7 @@
         },
         {
             "type": "item",
-            "item": [0,0,1],
+            "items": [0,0,1],
             "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
         }
     ],

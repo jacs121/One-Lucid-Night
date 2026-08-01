@@ -115,7 +115,7 @@ available_enemies = [Staticon, Obeliskus, Maime]
 wave_filepath = "./waves.json"
 
 if not os.path.exists(wave_filepath):
-    wave_filepath = wave_filepath[2:]
+    wave_filepath = application.asset_folder / "waves.json"
 
 
 def element_number_converter(value) -> float:
@@ -159,8 +159,8 @@ def dialogCallback3():
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: TOUCH THE ITEM"
-    items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
-    items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
+    items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
     player.can_move = True
 
 def dialogCallback2():

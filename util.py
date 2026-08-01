@@ -1,6 +1,6 @@
 from imports import *
 
-app = Ursina()
+app = Ursina(development_mode=getattr(sys, 'frozen', False))
 
 def generate_noise_texture(seed: str, width=512, height=512):
     data = seed.encode('utf-8')

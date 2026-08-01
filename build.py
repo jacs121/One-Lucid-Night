@@ -14,7 +14,7 @@ patterns = [
 ]
 
 script = "main.py"
-exe_name = "One Lucid Night"
+exe_name = "one-lucid-night"
 
 # Build the --add-data arguments
 args = []
@@ -29,15 +29,6 @@ for pattern in patterns:
             args.append(f'--add-data "{file.as_posix()};{file.as_posix()}"')
 
 bat = f"""pyinstaller --onefile --noconfirm --windowed --clean --collect-data "ursina" --collect-data "PIL" --collect-data "numpy" --collect-data "panda3d" --collect-all "ursina" --collect-all "PIL" --collect-all "panda3d" --collect-all "numpy" --hidden-import "ursina" --hidden-import "PIL" --hidden-import "numpy" --hidden-import "panda3d"  --name "{exe_name}" {" ".join(args)} "{script}" """
-
-if os.path.exists("dist"):
-    shutil.rmtree("dist")
-
-if os.path.exists("build"):
-    shutil.rmtree("build")
-
-if os.path.exists("dist"):
-    shutil.rmtree("dist")
 
 print("running:", bat)
 subprocess.run(bat, shell=True)

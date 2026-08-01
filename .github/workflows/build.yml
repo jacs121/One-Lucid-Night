@@ -32,7 +32,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
+          name: one-lucid-night-${{ matrix.os }}
           path: dist/*
 
   release:
@@ -49,21 +49,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/download-artifact@v4
         with:
-          name: build-windows-latest
+          name: one-lucid-night-windows
           path: windows
       
       - name: Download Linux build
         if: matrix.os == 'ubuntu-latest'
         uses: actions/download-artifact@v4
         with:
-          name: build-ubuntu-latest
+          name: one-lucid-night-ubuntu
           path: linux
     
       - name: Download MacOS build
         if: matrix.os == 'macos-latest'
         uses: actions/download-artifact@v4
         with:
-          name: build-macos-latest
+          name: one-lucid-night-macos
           path: macos
 
       - name: Create Release
