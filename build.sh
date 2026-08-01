@@ -82,12 +82,10 @@ cmd_args=(
     --name "one-lucid-night-${PLATFORM}"
     --collect-data "ursina"
     --collect-data "PIL"
-    --collect-data "numpy"
     --collect-data "panda3d"
     --collect-all "ursina"
     --collect-all "PIL"
     --collect-all "panda3d"
-    --collect-all "numpy"
 )
 
 for pair in "${DATA_PAIRS[@]}"; do
