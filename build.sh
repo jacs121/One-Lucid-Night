@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PLATFORM=$1
-pip install --no-input pyinstaller numpy panda3d pillow requests
+
+pip install --no-input pyinstaller numpy panda3d pillow
 
 case "$PLATFORM" in
     windows)
@@ -28,17 +29,12 @@ DATA_PAIRS=(
     "models/staticon:models/staticon"
     "models/staticon.glb:models"
     "models/conctus/animated.glb:models/conctus"
-    "models/conctus/entity.blend1:models/conctus"
     "models/maime/animation.glb:models/maime"
     "models/maime/basic.fbx:models/maime"
-    "models/maime/entity.blend1:models/maime"
-    "models/obeliskus/entity.blend1:models/obeliskus"
     "models/player/idle.fbx:models/player"
-    "models/player/player.blend1:models/player"
     "models/player/walk:models/player/walk"
     "models/staticon/animations.glb:models/staticon"
     "models/staticon/base.fbx:models/staticon"
-    "models/staticon/staticon.blend1:models/staticon"
     "models/player/walk/backwards.fbx:models/player/walk"
     "models/player/walk/forwards.fbx:models/player/walk"
     "models/player/walk/left.fbx:models/player/walk"
@@ -78,21 +74,26 @@ DATA_PAIRS=(
     "util.py:."
     "waves.json:."
 )
-CMD="pyinstaller --noconfirm --onefile --noconsole --name \"one-lucid-night-${PLATFORM}\""
+
+cmd_args=(
+    pyinstaller
+    --noconfirm
+    --onefile
+    --noconsole
+    --name "one-lucid-night-${PLATFORM}"
+)
 
 for pair in "${DATA_PAIRS[@]}"; do
     arg="${pair/:/$SEP}"
-    CMD="$CMD --add-data=\"$arg\""
+    cmd_args+=( "--add-data=${arg}" )
 done
 
-case "$PLATFORM" in
-    linux)
-        CMD="$CMD --noupx"
-        ;;
-esac
+if [ "$PLATFORM" = "linux" ]; then
+    cmd_args+=( --noupx )
+fi
 
-CMD="$CMD --clean main.py"
+cmd_args+=( --clean main.py )
 
-echo "Running: $CMD"
+echo "Running: ${cmd_args[*]}"
 
-eval $CMD
+exec "${cmd_args[@]}"
