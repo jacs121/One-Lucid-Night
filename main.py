@@ -7,8 +7,10 @@ if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--lo
 from ursina import *
 
 if getattr(sys, 'frozen', False):
-    window.fps_counter.enabled = False
-    window.entity_counter.enabled = False
+    if window.fps_counter:
+        window.fps_counter.enabled = False
+    if window.entity_counter:
+        window.entity_counter.enabled = False
     application.asset_folder = Path(sys._MEIPASS).absolute()
 else:
     application.asset_folder = Path(__file__).parent.absolute()
