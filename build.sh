@@ -1,207 +1,109 @@
 #!/bin/bash
 
 PLATFORM=$1
-
-# Install dependencies
 pip install --no-input pyinstaller numpy panda3d pillow pyvirtualcam requests
 
-if [ "$PLATFORM" = "windows" ]: then
-    pyinstaller --noconfirm --onefile --noconsole \
-        --name "one-lucid-night-windows" \
-        --add-data "models\conctus:models\conctus" \
-        --add-data "models\conctus.glb:models" \
-        --add-data "models\maime:models\maime" \
-        --add-data "models\maime.glb:models" \
-        --add-data "models\obeliskus:models\obeliskus" \
-        --add-data "models\obeliskus.glb:models" \
-        --add-data "models\player:models\player" \
-        --add-data "models\player.glb:models" \
-        --add-data "models\staticon:models\staticon" \
-        --add-data "models\staticon.glb:models" \
-        --add-data "models\conctus\animated.glb:models\conctus" \
-        --add-data "models\conctus\entity.blend1:models\conctus" \
-        --add-data "models\maime\animation.glb:models\maime" \
-        --add-data "models\maime\basic.fbx:models\maime" \
-        --add-data "models\maime\entity.blend1:models\maime" \
-        --add-data "models\obeliskus\entity.blend1:models\obeliskus" \
-        --add-data "models\player\idle.fbx:models\player" \
-        --add-data "models\player\player.blend1:models\player" \
-        --add-data "models\player\walk:models\player\walk" \
-        --add-data "models\staticon\animations.glb:models\staticon" \
-        --add-data "models\staticon\base.fbx:models\staticon" \
-        --add-data "models\staticon\staticon.blend1:models\staticon" \
-        --add-data "models\player\walk\backwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\forwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\left.fbx:models\player\walk" \
-        --add-data "models\player\walk\right.fbx:models\player\walk" \
-        --add-data "textures\crosshair.png:textures" \
-        --add-data "textures\crosshair_ring.png:textures" \
-        --add-data "textures\reloading:textures\reloading" \
-        --add-data "textures\shotgun.png:textures" \
-        --add-data "textures\shotgun_pump.png:textures" \
-        --add-data "textures\reloading\close_chamber.png:textures\reloading" \
-        --add-data "textures\reloading\continue.png:textures\reloading" \
-        --add-data "textures\reloading\get_bullet.png:textures\reloading" \
-        --add-data "textures\reloading\insert_bullet.png:textures\reloading" \
-        --add-data "audio\ambient.wav:audio" \
-        --add-data "audio\dialog_pop.mp3:audio" \
-        --add-data "audio\main_menu.wav:audio" \
-        --add-data "audio\runes:audio\runes" \
-        --add-data "audio\shotgun:audio\shotgun" \
-        --add-data "audio\spider:audio\spider" \
-        --add-data "audio\step.mp3:audio" \
-        --add-data "audio\runes\advancing_rune.mp3:audio\runes" \
-        --add-data "audio\shotgun\clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\close_chamber.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\empty_clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\insert_bullet.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_back.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_forth.mp3:audio\shotgun" \
-        --add-data "audio\spider\death.mp3:audio\spider" \
-        --add-data "audio\spider\hit.mp3:audio\spider" \
-        --add-data "build.py:." \
-        --add-data "enemies.py:." \
-        --add-data "entities.py:." \
-        --add-data "imports.py:." \
-        --add-data "items.py:." \
-        --add-data "main.py:." \
-        --add-data "runes.py:." \
-        --add-data "util.py:." \
-        --add-data "waves.json:." \
-        --clean main.py
+case "$PLATFORM" in
+    windows)
+        SEP=";"
+        ;;
+    linux|macos)
+        SEP=":"
+        ;;
+    *)
+        echo "Usage: build.sh [windows|linux|macos]"
+        exit 1
+        ;;
+esac
 
-elif [ "$PLATFORM" = "linux" ]: then
-    pyinstaller --noconfirm --onefile --noconsole \
-        --name "one-lucid-night-linux.exe" \
-        --add-data "models\conctus:models\conctus" \
-        --add-data "models\conctus.glb:models" \
-        --add-data "models\maime:models\maime" \
-        --add-data "models\maime.glb:models" \
-        --add-data "models\obeliskus:models\obeliskus" \
-        --add-data "models\obeliskus.glb:models" \
-        --add-data "models\player:models\player" \
-        --add-data "models\player.glb:models" \
-        --add-data "models\staticon:models\staticon" \
-        --add-data "models\staticon.glb:models" \
-        --add-data "models\conctus\animated.glb:models\conctus" \
-        --add-data "models\conctus\entity.blend1:models\conctus" \
-        --add-data "models\maime\animation.glb:models\maime" \
-        --add-data "models\maime\basic.fbx:models\maime" \
-        --add-data "models\maime\entity.blend1:models\maime" \
-        --add-data "models\obeliskus\entity.blend1:models\obeliskus" \
-        --add-data "models\player\idle.fbx:models\player" \
-        --add-data "models\player\player.blend1:models\player" \
-        --add-data "models\player\walk:models\player\walk" \
-        --add-data "models\staticon\animations.glb:models\staticon" \
-        --add-data "models\staticon\base.fbx:models\staticon" \
-        --add-data "models\staticon\staticon.blend1:models\staticon" \
-        --add-data "models\player\walk\backwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\forwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\left.fbx:models\player\walk" \
-        --add-data "models\player\walk\right.fbx:models\player\walk" \
-        --add-data "textures\crosshair.png:textures" \
-        --add-data "textures\crosshair_ring.png:textures" \
-        --add-data "textures\reloading:textures\reloading" \
-        --add-data "textures\shotgun.png:textures" \
-        --add-data "textures\shotgun_pump.png:textures" \
-        --add-data "textures\reloading\close_chamber.png:textures\reloading" \
-        --add-data "textures\reloading\continue.png:textures\reloading" \
-        --add-data "textures\reloading\get_bullet.png:textures\reloading" \
-        --add-data "textures\reloading\insert_bullet.png:textures\reloading" \
-        --add-data "audio\ambient.wav:audio" \
-        --add-data "audio\dialog_pop.mp3:audio" \
-        --add-data "audio\main_menu.wav:audio" \
-        --add-data "audio\runes:audio\runes" \
-        --add-data "audio\shotgun:audio\shotgun" \
-        --add-data "audio\spider:audio\spider" \
-        --add-data "audio\step.mp3:audio" \
-        --add-data "audio\runes\advancing_rune.mp3:audio\runes" \
-        --add-data "audio\shotgun\clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\close_chamber.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\empty_clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\insert_bullet.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_back.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_forth.mp3:audio\shotgun" \
-        --add-data "audio\spider\death.mp3:audio\spider" \
-        --add-data "audio\spider\hit.mp3:audio\spider" \
-        --add-data "build.py:." \
-        --add-data "enemies.py:." \
-        --add-data "entities.py:." \
-        --add-data "imports.py:." \
-        --add-data "items.py:." \
-        --add-data "main.py:." \
-        --add-data "runes.py:." \
-        --add-data "util.py:." \
-        --add-data "waves.json:." \
-        --noupx \
-        --clean main.py
+DATA_PAIRS=(
+    "models/conctus:models/conctus"
+    "models/conctus.glb:models"
+    "models/maime:models/maime"
+    "models/maime.glb:models"
+    "models/obeliskus:models/obeliskus"
+    "models/obeliskus.glb:models"
+    "models/player:models/player"
+    "models/player.glb:models"
+    "models/staticon:models/staticon"
+    "models/staticon.glb:models"
+    "models/conctus/animated.glb:models/conctus"
+    "models/conctus/entity.blend1:models/conctus"
+    "models/maime/animation.glb:models/maime"
+    "models/maime/basic.fbx:models/maime"
+    "models/maime/entity.blend1:models/maime"
+    "models/obeliskus/entity.blend1:models/obeliskus"
+    "models/player/idle.fbx:models/player"
+    "models/player/player.blend1:models/player"
+    "models/player/walk:models/player/walk"
+    "models/staticon/animations.glb:models/staticon"
+    "models/staticon/base.fbx:models/staticon"
+    "models/staticon/staticon.blend1:models/staticon"
+    "models/player/walk/backwards.fbx:models/player/walk"
+    "models/player/walk/forwards.fbx:models/player/walk"
+    "models/player/walk/left.fbx:models/player/walk"
+    "models/player/walk/right.fbx:models/player/walk"
+    "textures/crosshair.png:textures"
+    "textures/crosshair_ring.png:textures"
+    "textures/reloading:textures/reloading"
+    "textures/shotgun.png:textures"
+    "textures/shotgun_pump.png:textures"
+    "textures/reloading/close_chamber.png:textures/reloading"
+    "textures/reloading/continue.png:textures/reloading"
+    "textures/reloading/get_bullet.png:textures/reloading"
+    "textures/reloading/insert_bullet.png:textures/reloading"
+    "audio/ambient.wav:audio"
+    "audio/dialog_pop.mp3:audio"
+    "audio/main_menu.wav:audio"
+    "audio/runes:audio/runes"
+    "audio/shotgun:audio/shotgun"
+    "audio/spider:audio/spider"
+    "audio/step.mp3:audio"
+    "audio/runes/advancing_rune.mp3:audio/runes"
+    "audio/shotgun/clink.mp3:audio/shotgun"
+    "audio/shotgun/close_chamber.mp3:audio/shotgun"
+    "audio/shotgun/empty_clink.mp3:audio/shotgun"
+    "audio/shotgun/insert_bullet.mp3:audio/shotgun"
+    "audio/shotgun/pump_back.mp3:audio/shotgun"
+    "audio/shotgun/pump_forth.mp3:audio/shotgun"
+    "audio/spider/death.mp3:audio/spider"
+    "audio/spider/hit.mp3:audio/spider"
+    "build.py:."
+    "enemies.py:."
+    "entities.py:."
+    "imports.py:."
+    "items.py:."
+    "main.py:."
+    "runes.py:."
+    "util.py:."
+    "waves.json:."
+)
 
-elif [ "$PLATFORM" = "macos" ]: then
-    pyinstaller --noconfirm --onefile --noconsole \
-        --name "one-lucid-night-macos.exe" \
-        --add-data "models\conctus:models\conctus" \
-        --add-data "models\conctus.glb:models" \
-        --add-data "models\maime:models\maime" \
-        --add-data "models\maime.glb:models" \
-        --add-data "models\obeliskus:models\obeliskus" \
-        --add-data "models\obeliskus.glb:models" \
-        --add-data "models\player:models\player" \
-        --add-data "models\player.glb:models" \
-        --add-data "models\staticon:models\staticon" \
-        --add-data "models\staticon.glb:models" \
-        --add-data "models\conctus\animated.glb:models\conctus" \
-        --add-data "models\conctus\entity.blend1:models\conctus" \
-        --add-data "models\maime\animation.glb:models\maime" \
-        --add-data "models\maime\basic.fbx:models\maime" \
-        --add-data "models\maime\entity.blend1:models\maime" \
-        --add-data "models\obeliskus\entity.blend1:models\obeliskus" \
-        --add-data "models\player\idle.fbx:models\player" \
-        --add-data "models\player\player.blend1:models\player" \
-        --add-data "models\player\walk:models\player\walk" \
-        --add-data "models\staticon\animations.glb:models\staticon" \
-        --add-data "models\staticon\base.fbx:models\staticon" \
-        --add-data "models\staticon\staticon.blend1:models\staticon" \
-        --add-data "models\player\walk\backwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\forwards.fbx:models\player\walk" \
-        --add-data "models\player\walk\left.fbx:models\player\walk" \
-        --add-data "models\player\walk\right.fbx:models\player\walk" \
-        --add-data "textures\crosshair.png:textures" \
-        --add-data "textures\crosshair_ring.png:textures" \
-        --add-data "textures\reloading:textures\reloading" \
-        --add-data "textures\shotgun.png:textures" \
-        --add-data "textures\shotgun_pump.png:textures" \
-        --add-data "textures\reloading\close_chamber.png:textures\reloading" \
-        --add-data "textures\reloading\continue.png:textures\reloading" \
-        --add-data "textures\reloading\get_bullet.png:textures\reloading" \
-        --add-data "textures\reloading\insert_bullet.png:textures\reloading" \
-        --add-data "audio\ambient.wav:audio" \
-        --add-data "audio\dialog_pop.mp3:audio" \
-        --add-data "audio\main_menu.wav:audio" \
-        --add-data "audio\runes:audio\runes" \
-        --add-data "audio\shotgun:audio\shotgun" \
-        --add-data "audio\spider:audio\spider" \
-        --add-data "audio\step.mp3:audio" \
-        --add-data "audio\runes\advancing_rune.mp3:audio\runes" \
-        --add-data "audio\shotgun\clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\close_chamber.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\empty_clink.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\insert_bullet.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_back.mp3:audio\shotgun" \
-        --add-data "audio\shotgun\pump_forth.mp3:audio\shotgun" \
-        --add-data "audio\spider\death.mp3:audio\spider" \
-        --add-data "audio\spider\hit.mp3:audio\spider" \
-        --add-data "build.py:." \
-        --add-data "enemies.py:." \
-        --add-data "entities.py:." \
-        --add-data "imports.py:." \
-        --add-data "items.py:." \
-        --add-data "main.py:." \
-        --add-data "runes.py:." \
-        --add-data "util.py:." \
-        --add-data "waves.json:." \
-        --clean main.py
+ADD_DATA_ARGS=()
+for pair in "${DATA_PAIRS[@]}"; do
 
-else
-    echo "Usage: build.sh [windows|linux|macos]"
-    exit 1
-fi
+    arg="${pair/:/$SEP}"
+    ADD_DATA_ARGS+=( --add-data "$arg" )
+done
+
+case "$PLATFORM" in
+    windows)
+        pyinstaller --noconfirm --onefile --noconsole \
+            --name "one-lucid-night-windows" \
+            "${ADD_DATA_ARGS[@]}" \
+            --clean main.py
+        ;;
+    linux)
+        pyinstaller --noconfirm --onefile --noconsole \
+            --name "one-lucid-night-linux" \
+            "${ADD_DATA_ARGS[@]}" \
+            --noupx \
+            --clean main.py
+        ;;
+    macos)
+        pyinstaller --noconfirm --onefile --noconsole \
+            --name "one-lucid-night-macos" \
+            "${ADD_DATA_ARGS[@]}" \
+            --clean main.py
+        ;;
+esac
