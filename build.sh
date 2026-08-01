@@ -83,7 +83,7 @@ ADD_DATA_ARGS=()
 for pair in "${DATA_PAIRS[@]}"; do
 
     arg="${pair/:/$SEP}"
-    ADD_DATA_ARGS+=( --add-data "$arg" )
+    ADD_DATA_ARGS+=( --add-data="$arg" )
 done
 
 case "$PLATFORM" in
