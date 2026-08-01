@@ -40,4 +40,4 @@ if os.path.exists("dist"):
     shutil.rmtree("dist")
 
 print("running:", bat)
-subprocess.run(["cmd", "/c", bat], check=True)
+subprocess.run(bat, shell=True)
