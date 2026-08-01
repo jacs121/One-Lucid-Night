@@ -114,7 +114,7 @@ available_enemies = [Staticon, Obeliskus, Maime]
 
 wave_filepath = "./waves.json"
 
-if os.path.exists(wave_filepath):
+if not os.path.exists(wave_filepath):
     wave_filepath = wave_filepath[2:]
 
 
@@ -152,7 +152,6 @@ for wave_num, wave_data in enumerate(waves_data):
                 kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
             waves[-1]["enemies"].append(kwargs)
-            waves[-1]["enemies"][-1].update(kwargs)
 
 def dialogCallback3():
     global items
