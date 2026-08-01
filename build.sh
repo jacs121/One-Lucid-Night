@@ -2,7 +2,7 @@
 
 PLATFORM=$1
 
-pip install --no-input pyinstaller numpy panda3d pillow ursina
+pip install --no-input pyinstaller numpy panda3d pillow ursina scipy
 
 case "$PLATFORM" in
     windows)
