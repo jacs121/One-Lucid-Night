@@ -81,6 +81,10 @@ cmd_args=(
     --onefile
     --noconsole
     --name "one-lucid-night-${PLATFORM}"
+    --collect-all "ursina"
+    --collect-all "PIL"
+    --collect-all "panda3d"
+    --collect-all "numpy"
 )
 
 for pair in "${DATA_PAIRS[@]}"; do
