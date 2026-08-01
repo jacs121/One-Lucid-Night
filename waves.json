@@ -2,8 +2,55 @@
     [
         {
             "type": "enemy",
+            "enemies": [0],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": [0],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": [0],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "rune",
+            "runes": [3],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "item",
+            "item": [0,0,1],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        }
+    ],
+    [
+        {
+            "type": "enemy",
+            "enemies": [0],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": [0],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": [1],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": [1],
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
+        },
+        {
+            "type": "enemy",
             "enemies": [2],
-            "position": [[{"min": -10, "max": "l"}, {"min": 10, "max": "r"}], [{"min": 10, "max": "t"}, {"min": -10, "max": "b"}]]
+            "position": [[{"min": -5, "max": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"min": -5, "max": "b"}]]
         }
     ]
 ]

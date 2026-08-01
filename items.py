@@ -2,7 +2,7 @@ from util import *
 from entities import tutorial, player, ShowDialog
 
 class Item(Entity):
-    def __init__(self, item_name: str, position: tuple[int, int, int] = (0, 1.3, 0), gather_distance: float = 0.5, enabled: bool = False):
+    def __init__(self, item_name: str, position: tuple[int, int, int] = (0, 1.3, 0), gather_distance: float = 0.5, enabled: bool = True):
         super().__init__(
             model="sphere",
             scale=(0.75,0,0.75),
@@ -70,22 +70,22 @@ def dialogCallback4():
     tutorial.text = "TUTORIAL: PRESS R TO LOAD SHOTGUN"
 
 class ammoBox(Item):
-    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
-        super().__init__("ammo box", position, 0.5, enabled)
+    def __init__(self, position = (0, 1.3, 0)):
+        super().__init__("ammo box", position, 0.5)
 
     def give(self, distance, dt):
         player.ammo_packets_count += 8
 
 class medicine(Item):
-    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
-        super().__init__("medicine", position, 0.25, enabled)
+    def __init__(self, position = (0, 1.3, 0)):
+        super().__init__("medicine", position, 0.25)
 
     def give(self, distance, dt):
         player.health = min(player.health + player.max_health/10, player.max_health)
 
 class fullMedicineKit(Item):
-    def __init__(self, position = (0, 1.3, 0), enabled: bool = False):
-        super().__init__("full medicine kit", position, 0.5, enabled)
+    def __init__(self, position = (0, 1.3, 0)):
+        super().__init__("full medicine kit", position, 0.5)
 
     def give(self, distance, dt):
         player.health = player.max_health

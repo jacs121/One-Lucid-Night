@@ -3,7 +3,7 @@ from items import Item
 from entities import player
 
 class Enemy(Entity):
-    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 100, color: color.Color = color.white, enabled: bool = False):
+    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 20, color: color.Color = color.white, enabled: bool = True):
         super().__init__(
             model=model,
             scale=scale,
@@ -75,14 +75,13 @@ class Enemy(Entity):
             trigger_screen_fade()
 
 class Staticon(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, base_color: color.Color = color.gray, ai_active: bool = True, enabled: bool = False):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True):
         super().__init__(
             model="models/staticon.glb",
             scale=size,
             position=position,
             max_health=max_health,
-            color=base_color,
-            enabled=enabled
+            color=base_color
         )
         
         self.speed=speed
@@ -217,13 +216,12 @@ class Staticon(Enemy):
             self.update_texture_offset()
 
 class Obeliskus(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, enabled: bool = False):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True):
         super().__init__(
             model="models/obeliskus.glb",
             position=position,
             scale=size,
-            max_health=max_health,
-            enabled=enabled
+            max_health=max_health
         )
 
         self.ai_active = ai_active
@@ -314,14 +312,13 @@ class Obeliskus(Enemy):
             self.attacked_timer = 6 + self.attacked_timer/3
 
 class Maime(Enemy):
-    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False, enabled: bool = False):
+    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(
             model="models/maime.glb",
             position=item.position,
             scale=item.scale,
-            max_health=max_health,
-            enabled=enabled
+            max_health=max_health
         )
         
         self.model = item.model

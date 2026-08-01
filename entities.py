@@ -12,6 +12,7 @@ class Player(Entity):
         )
     
         self.speed = speed
+        self.attack_damage = 10
         self.max_health = self.health = max_health
         self.view_cone_half_angle = view_cone_range / 2
         self.set_shader_input(
@@ -32,7 +33,7 @@ class Player(Entity):
         self.last_mouse_x = mouse.x
         self.last_mouse_y = mouse.y
         self.direction = Vec3(0)
-        self.waving_mora = 0
+        self.experience = 0
 
         self.shotgun_ammo_count = 0
         self.ammo_packets_count = 0
@@ -80,7 +81,11 @@ class Player(Entity):
                 math.atan2(-mouse.y, mouse.x)
             )
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
-        
+
+        if not tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
+            if distance_xz(runes[0].position.xz, self.position.xz - self.direction/2) <= runes[0].activation_distance:
+                tutorial.text = "TUTORIAL: INTERACT WITH A RUNE BY PRESSING SPACE"
+
         if not self.reloading:
             self.move_input = Vec3(
                 (held_keys['d'] or held_keys["right arrow"]) - (held_keys['a'] or held_keys["left arrow"]),
@@ -192,7 +197,7 @@ class Player(Entity):
                         else:
                             rangeMultiplier = max(0.0, 1.0 - ((t - 1.5) / 23.5))
 
-                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (25/SHOTGUN_PELLET_COUNT * rangeMultiplier * random.uniform(0.95, 1.05))
+                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage/SHOTGUN_PELLET_COUNT * rangeMultiplier * random.uniform(0.95, 1.05))
                         hit = True
                         ray = Entity(
                             model='quad',
@@ -220,6 +225,8 @@ class Player(Entity):
 
         for entity, damage in bullets_hit.items():
             entity.damage(damage)
+            if entity.health == 0:
+                self.experience += damage
 
     def update_shotgun(self, dt):
         if self.shotgun_pumping:
@@ -495,10 +502,9 @@ void = Entity(
     unlit=True
 )
 
-void_fade_in = void.fade_in(1/16, duration=4)
+void_fade_in = void.fade_in(1/16, duration=3)
 
 void_noise_timer = 0
-
 
 ground.set_shader_input(
     "position", Vec2(0)
@@ -519,5 +525,6 @@ title_text = Text(
 start_game_text = Text(
     text="press space to start",
     origin=(0, -0.45),
-    position=(0, -0.45)
+    position=(0, -0.45),
+    color=color.rgba(1,1,1,0)
 )

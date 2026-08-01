@@ -120,3 +120,4 @@ items: list = []
 runes: list = []
 
 main_menu = True
+tutorial_enemy = None

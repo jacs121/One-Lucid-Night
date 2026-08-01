@@ -17,9 +17,9 @@ from enemies import *
 from runes import *
 
 def input(key):
-    global enemies, tutorial_ended, main_menu
+    global enemies, main_menu, tutorial_enemy
     if main_menu:
-        if key == "space":
+        if key == "space" and void_fade_in.finished:
             print("starting game")
             main_menu = False
             start_game()
@@ -47,7 +47,7 @@ def input(key):
                 ammo_packets_count_ui.text = "[OUT OF AMMO PACKETS]"
                 player.reload_step = 3
                 reload_image.texture = '/textures/reloading/close_chamber.png'
-        elif key == 'c' and tutorial_ended:
+        elif key == 'c' and tutorial_enemy == None:
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
@@ -89,7 +89,7 @@ def input(key):
             player.reload_step = 3
             reload_image.texture = '/textures/reloading/close_chamber.png'
 
-    if (player.reload_step == 3 or (player.reload_step == 1 and tutorial_ended)) and (key == 'up arrow up' or key == "w up"):
+    if (player.reload_step == 3 or (player.reload_step == 1 and tutorial_enemy == None)) and (key == 'up arrow up' or key == "w up"):
         tutorial.text = "TUTORIAL: PRESS ESCAPE TO GO BACK"
         Audio("audio/shotgun/close_chamber.mp3")
         reload_image.texture = '/textures/reloading/continue.png'
@@ -101,16 +101,15 @@ def input(key):
         player.reload_step = 0
         reload_image.disable()
         ammo_packets_count_ui.disable()
-        if tutorial.enabled:
+        if tutorial_enemy == None:
             enemies.append(Staticon((15, 0.3, 15), enabled=True))
-            tutorial.disable()
-            tutorial_ended = True
+            tutorial.text = "TUTORIAL: KILL A STATICON"
 
 def power_lerp(x, a=1):
     return 1-math.log(math.cosh((1-2*x)/a))+math.log(math.cosh(1/a))-1
 
 available_items = [ammoBox, medicine, fullMedicineKit]
-available_runes = [HarmRune, WhisperRune, AdvancingRune]
+available_runes = [HarmRune, WhisperRune, AdvancingRune, sharpenRune]
 available_enemies = [Staticon, Obeliskus, Maime]
 
 wave_filepath = "./waves.json"
@@ -135,29 +134,34 @@ waves_data = json.load(open(wave_filepath))
 for wave_num, wave_data in enumerate(waves_data):
     waves.append({"items": [], "enemies": [], "runes": []})
     for element in wave_data:
-        position = (element_number_converter(element["position"][0]), 1, element_number_converter(element["position"][1]))
+        position = element.pop("position")
+        element["position"] = (element_number_converter(position[0]), 1, element_number_converter(position[1]))
         if element["type"] == "item":
             elementIndex = random.choice(element["items"])
             waves[-1]["items"].append({"items": available_items[elementIndex], "position": position})
+            waves[-1]["items"][-1].update(kwargs)
         elif element["type"] == "rune":
             elementIndex = random.choice(element["runes"])
             waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
+            waves[-1]["runes"][-1].update(kwargs)
         elif element["type"] == "enemy":
             elementIndex = random.choice(element["enemies"])
-            
+
             kwargs = {"enemy": available_enemies[elementIndex], "position": position}
             if kwargs["enemy"] == Maime:
                 kwargs["item"] = {"entity": random.choice(available_items), "position": position}
-            
+
             waves[-1]["enemies"].append(kwargs)
+            waves[-1]["enemies"][-1].update(kwargs)
 
 def dialogCallback3():
     global items
 
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
-    tutorial.text = "TUTORIAL: GO TOUCH THE ITEM"
+    tutorial.text = "TUTORIAL: TOUCH THE ITEM"
     items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
+    items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5)), True))
     player.can_move = True
 
 def dialogCallback2():
@@ -185,6 +189,9 @@ def dialogCallback1():
 def update_game(dt: float):
     global screen_shift_strength, screen_fade_animation
     global game_won, waiting_to_advance
+    
+    if tutorial_ended and tutorial.enabled:
+        tutorial.disable()
 
     if screen_fade_animation > 0:
         screen_fade_animation -= dt/10
@@ -207,7 +214,6 @@ def update_game(dt: float):
                 app.userExit()
         return
 
-    # Screen effect
     if screen_shift_strength > 0:
         screen_shift_strength -= dt
         screen_shift.color = color.rgba(
@@ -236,15 +242,19 @@ def update_game(dt: float):
 
     for item in items:
         item.update_item(dt)
-        
+
     for rune in runes:
         rune.update_rune(dt)
-        
-    if alive_enemies == 0 and not waiting_to_advance and tutorial_ended:
+
+    if alive_enemies == 0 and not waiting_to_advance and tutorial.text == "TUTORIAL: KILL A STATICON":
         runes.append(AdvancingRune(enabled=True))
         waiting_to_advance = True
 
+        if not tutorial_ended:
+            tutorial.text = "TUTORIAL: FIND THE RUNE"
+
 def start_game():
+    main_menu_music.stop()
     Audio("audio/ambient.wav", loop=True)
     ground.fade_in(1, duration=3)
     invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
@@ -253,6 +263,8 @@ def start_game():
     start_game_text.disable()
     player.enable()
     player.can_move = False
+
+main_menu_music = Audio("audio/main_menu.wav", loop=True, volume=0.75, autoplay=True)
 
 def update():
     global void_noise_timer
@@ -265,5 +277,9 @@ def update():
     if void_noise_timer > 1.5:
         void_noise_timer = 0
         void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)))
+    
+    if void_fade_in.finished:
+        if start_game_text.color.a == 0:
+            start_game_text.fade_in(duration=1)
 
 app.run()
