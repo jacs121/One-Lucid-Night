@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PLATFORM=$1
-pip install --no-input pyinstaller numpy panda3d pillow pyvirtualcam requests
+pip install --no-input pyinstaller numpy panda3d pillow requests
 
 case "$PLATFORM" in
     windows)
