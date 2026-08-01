@@ -64,7 +64,6 @@ DATA_PAIRS=(
     "audio/shotgun/pump_forth.mp3:audio/shotgun"
     "audio/spider/death.mp3:audio/spider"
     "audio/spider/hit.mp3:audio/spider"
-    "build.py:."
     "enemies.py:."
     "entities.py:."
     "imports.py:."
@@ -81,6 +80,10 @@ cmd_args=(
     --onefile
     --noconsole
     --name "one-lucid-night-${PLATFORM}"
+    --collect-data "ursina"
+    --collect-data "PIL"
+    --collect-data "numpy"
+    --collect-data "panda3d"
     --collect-all "ursina"
     --collect-all "PIL"
     --collect-all "panda3d"
@@ -89,7 +92,7 @@ cmd_args=(
 
 for pair in "${DATA_PAIRS[@]}"; do
     arg="${pair/:/$SEP}"
-    cmd_args+=( "--add-data=${arg}" )
+    cmd_args+=( "--add-data=\"${arg}"\" )
 done
 
 if [ "$PLATFORM" = "linux" ]; then
