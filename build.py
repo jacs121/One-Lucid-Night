@@ -31,4 +31,4 @@ for pattern in patterns:
 bat = f"""pyinstaller --onefile --noconfirm --windowed --clean --collect-data "ursina" --collect-data "PIL" --collect-data "numpy" --collect-data "panda3d" --collect-all "ursina" --collect-all "PIL" --collect-all "panda3d" --collect-all "numpy" --hidden-import "ursina" --hidden-import "PIL" --hidden-import "numpy" --hidden-import "panda3d"  --name "{exe_name}" {" ".join(args)} "{script}" """
 
 print("running:", bat)
-subprocess.run(bat, shell=True)
+# subprocess.run(bat, shell=True)
