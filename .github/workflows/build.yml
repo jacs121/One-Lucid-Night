@@ -32,7 +32,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: one-lucid-night-${{ matrix.os }}
+          name: one-lucid-night
           path: dist/*
 
   release:
