@@ -24,13 +24,21 @@ case "$PLATFORM" in
 windows)
     cd dist
 
-    zip -r \
-        ../releases/one-lucid-night-windows.zip \
-        one-lucid-night
+    python <<-'PY'
+    import shutil
 
-    tar -czf \
-        ../releases/one-lucid-night-windows.tar.gz \
-        one-lucid-night
+    shutil.make_archive(
+        "../releases/one-lucid-night-windows",
+        "zip",
+        "one-lucid-night"
+    )
+
+    shutil.make_archive(
+        "../releases/one-lucid-night-windows",
+        "gztar",
+        "one-lucid-night"
+    )
+PY
 
     cd ..
 ;;
@@ -38,13 +46,23 @@ windows)
 linux)
     cd dist
 
-    zip -r \
-        ../releases/one-lucid-night-linux.zip \
-        one-lucid-night
+    python - <<'PY'
+    import shutil
 
-    tar -czf \
-        ../releases/one-lucid-night-linux.tar.gz \
-        one-lucid-night
+    shutil.make_archive(
+        "../releases/one-lucid-night-linux",
+        "zip",
+        "one-lucid-night"
+    )
+
+    shutil.make_archive(
+        "../releases/one-lucid-night-linux",
+        "gztar",
+        "one-lucid-night"
+    )
+PY
+
+cd ..
 
     cd ..
 ;;
@@ -59,9 +77,15 @@ macos)
         one-lucid-night \
         ../releases/one-lucid-night-macos.zip
 
-    tar -czf \
-        ../releases/one-lucid-night-macos.tar.gz \
-        one-lucid-night
+    python - <<'PY'
+    import shutil
+
+    shutil.make_archive(
+        "../releases/one-lucid-night-macos",
+        "gztar",
+        "one-lucid-night"
+    )
+PY
 ;;
 
 *)
