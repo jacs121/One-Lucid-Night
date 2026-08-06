@@ -83,7 +83,7 @@ class Player(Entity):
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
 
         if not tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
-            if distance_xz(runes[0].position.xz, self.position.xz - self.direction/2) <= runes[0].activation_distance:
+            if distance_2d(runes[0].position.xz, self.position.xz - self.direction.xz/2) <= runes[0].activation_distance:
                 tutorial.text = "TUTORIAL: INTERACT WITH A RUNE BY PRESSING SPACE"
 
         if not self.reloading:
@@ -494,7 +494,7 @@ ground = Entity(
 
 void = Entity(
     model='plane',
-    texture=generate_noise_texture("void"),
+    texture=generate_noise_texture("void", max_value=50),
     scale=200,
     y=-0.1,
     texture_scale=(5, 5),
@@ -502,7 +502,7 @@ void = Entity(
     unlit=True
 )
 
-void_fade_in = void.fade_in(1/16, duration=3)
+void_fade_in = void.fade_in(1, duration=3, curve=curve.linear)
 
 void_noise_timer = 0
 

@@ -1,7 +1,7 @@
 import sys
 
 print("frozen execution:", getattr(sys, 'frozen', False))
-if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--loggingName":
+if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--loggingFile":
     sys.stdout = open(sys.argv[2]+".txt", "w")
 
 from ursina import *
@@ -29,6 +29,10 @@ def input(key):
             print("starting game")
             main_menu = False
             start_game()
+        elif key == "enter" and void_fade_in.finished:
+            print("starting game")
+            main_menu = False
+            start_game(True)
         return
 
     if not player.reloading and player.enabled:
@@ -36,7 +40,7 @@ def input(key):
             player.shoot()
         elif key == "left mouse down" and player.shotgun_ammo_count == 0:
             Audio("audio/shotgun/empty_clink.mp3")
-        elif key == 'r' and player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and not tutorial_ended and tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN":
+        elif key == 'r' and (player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and tutorial_ended or tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN"):
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
@@ -53,7 +57,7 @@ def input(key):
                 ammo_packets_count_ui.text = "[OUT OF AMMO PACKETS]"
                 player.reload_step = 3
                 reload_image.texture = '/textures/reloading/close_chamber.png'
-        elif key == 'c' and tutorial_enemy == None:
+        elif key == 'c' and (tutorial_ended or tutorial.text == "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"):
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
@@ -95,7 +99,7 @@ def input(key):
             player.reload_step = 3
             reload_image.texture = '/textures/reloading/close_chamber.png'
 
-    if (player.reload_step == 3 or (player.reload_step == 1 and tutorial_enemy == None)) and (key == 'up arrow up' or key == "w up"):
+    if (player.reload_step == 3 or (player.reload_step == 1 and tutorial_ended)) and (key == 'up arrow up' or key == "w up"):
         tutorial.text = "TUTORIAL: PRESS ESCAPE TO GO BACK"
         Audio("audio/shotgun/close_chamber.mp3")
         reload_image.texture = '/textures/reloading/continue.png'
@@ -108,8 +112,12 @@ def input(key):
         reload_image.disable()
         ammo_packets_count_ui.disable()
         if tutorial_enemy == None:
-            enemies.append(Staticon((15, 0.3, 15)))
-            tutorial.text = "TUTORIAL: KILL A STATICON"
+            if player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT:
+                tutorial.text = "TUTORIAL: TOUCH THE ITEM"
+                player.can_move = True
+            else:
+                enemies.append(Staticon((15, 0.3, 15)))
+                tutorial.text = "TUTORIAL: KILL A STATICON"
 
 def power_lerp(x, a=1):
     return 1-math.log(math.cosh((1-2*x)/a))+math.log(math.cosh(1/a))-1
@@ -142,18 +150,21 @@ for wave_num, wave_data in enumerate(waves_data):
     for element in wave_data:
         position = element.pop("position")
         element["position"] = (element_number_converter(position[0]), 1, element_number_converter(position[1]))
-        if element["type"] == "item":
-            elementIndex = random.choice(element["items"])
-            waves[-1]["items"].append({"items": available_items[elementIndex], "position": position})
-            waves[-1]["items"][-1].update(kwargs)
-        elif element["type"] == "rune":
-            elementIndex = random.choice(element["runes"])
+        element_type = element.pop("type")
+        if element_type == "item":
+            elementIndex = random.choice(element.pop("items"))
+            waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
+            waves[-1]["items"][-1].update(element)
+        elif element_type == "rune":
+            elementIndex = random.choice(element.pop("runes"))
             waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
-            waves[-1]["runes"][-1].update(kwargs)
-        elif element["type"] == "enemy":
-            elementIndex = random.choice(element["enemies"])
+            waves[-1]["runes"][-1].update(element)
+        elif element_type == "enemy":
+            elementIndex = random.choice(element.pop("enemies"))
 
             kwargs = {"enemy": available_enemies[elementIndex], "position": position}
+            kwargs.update(element)
+            
             if kwargs["enemy"] == Maime:
                 kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
@@ -164,10 +175,9 @@ def dialogCallback3():
 
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
-    tutorial.text = "TUTORIAL: TOUCH THE ITEM"
+    tutorial.text = "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"
     items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
     items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-    player.can_move = True
 
 def dialogCallback2():
     crosshair.enabled=True
@@ -258,20 +268,33 @@ def update_game(dt: float):
         if not tutorial_ended:
             tutorial.text = "TUTORIAL: FIND THE RUNE"
 
-def start_game():
-    main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
+def start_game(skip_tutorial: bool = False):
+    global items, enemies, tutorial_ended
+
     Audio("audio/ambient.wav", loop=True)
-    ground.fade_in(1, duration=3)
-    invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
+    if skip_tutorial:
+        items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        enemies.append(Staticon((15, 0.3, 15)))
+        tutorial_ended = True
+        main_menu_music.stop()
+        ground.color = color.rgb(*ground.color.rgb, 1)
+    else:
+        invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
+        invoke(main_menu_music.stop, delay=1.5)
+        ground.fade_in(1, duration=3)
+        main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
+        main_menu_music.animate("volume", 0, 1.5, curve=curve.linear)
+
     void_fade_in.finish()
     title_text.fade_out()
     start_game_text.disable()
     player.enable()
-    player.can_move = False
-    invoke(main_menu_music.stop, delay=1.5)
+    player.can_move = skip_tutorial
 
-main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0.75, autoplay=True)
+main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0, autoplay=True)
 main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
+main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 
 def update():
     global void_noise_timer
@@ -283,7 +306,7 @@ def update():
     void_noise_timer += dt
     if void_noise_timer > 1.5:
         void_noise_timer = 0
-        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)))
+        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)), max_value=50)
     
     if void_fade_in.finished:
         if start_game_text.color.a == 0:

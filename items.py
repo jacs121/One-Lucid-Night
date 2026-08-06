@@ -57,7 +57,8 @@ class Item(Entity):
         
         self.texture = generate_noise_texture("item_"+self.item_name+str(dt*100), 10, 10)
         if distance_xz(self.position, player.position - player.direction/2) <= self.gather_distance*self.scale.length():
-            ShowDialog("it seems there are items here that pulse fast in random colors, weird.").dialog_callback = dialogCallback4
+            if tutorial.text == "TUTORIAL: TOUCH THE ITEM" and not tutorial_ended:
+                ShowDialog("it seems there are items here that pulse fast in random colors, weird.").dialog_callback = dialogCallback4
 
             self.give(distance_xz(self.position, player.position - player.direction), dt)
             items.remove(self)

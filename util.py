@@ -2,11 +2,19 @@ from imports import *
 
 app = Ursina()
 
-def generate_noise_texture(seed: str, width=512, height=512):
+def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')
-    raw = list(hashlib.shake_256(data).digest(width * height))
+    mat = np.array(list(hashlib.shake_256(data).digest(width * height)), dtype=np.uint8)
+
+    scaled = (
+        mat.astype(np.float32)
+        * (max_value - min_value)
+        / 255
+        + min_value
+    ).astype(np.uint8)
+    
     img = Image.fromarray(
-        np.array(raw, dtype=np.uint8).reshape(width, height),
+        scaled.reshape(height, width),
         'L'
     )
     return Texture(img)
