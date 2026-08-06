@@ -4,9 +4,9 @@ import sys
 icon = None
 
 if sys.platform == "darwin":
-    icon = "assets/textures/ursina.icns"
+    icon = "assets/icons/icon.icns"
 else:
-    icon = "assets/textures/ursina.ico"
+    icon = "assets/icons/icon.ico"
 
 datas = [
     ("assets", "assets"),
