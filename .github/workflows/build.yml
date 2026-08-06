@@ -56,7 +56,34 @@ jobs:
 
           python -m pip install --no-cache-dir -r requirements.txt
 
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "macos-14" ]; then
+            echo "Using ARM64 Python"
+            arch -arm64 python -m pip install --upgrade pip
+
+            # Prevent architecture-mismatched Panda3D wheels
+            arch -arm64 python -m pip uninstall -y panda3d panda3d-gltf ursina || true
+
+            arch -arm64 python -m pip install --no-cache-dir -r requirements.txt
+          else
+            python -m pip install --upgrade pip
+
+            # Prevent architecture-mismatched Panda3D wheels
+            python -m pip uninstall -y panda3d panda3d-gltf ursina || true
+
+            python -m pip install --no-cache-dir -r requirements.txt
+          fi
+
           python -c "import platform; print('Architecture:', platform.machine())"
+      
+      - name: Check architectures
+        shell: bash
+        run: |
+          python -c "import platform; print(platform.machine())"
+          python -m pip show panda3d
+          file $(python -c "import panda3d,os; print(os.path.dirname(panda3d.__file__))")/rocket*.so
 
       - name: Build
         shell: bash
