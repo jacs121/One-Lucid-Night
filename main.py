@@ -108,7 +108,7 @@ def input(key):
         reload_image.disable()
         ammo_packets_count_ui.disable()
         if tutorial_enemy == None:
-            enemies.append(Staticon((15, 0.3, 15), enabled=True))
+            enemies.append(Staticon((15, 0.3, 15)))
             tutorial.text = "TUTORIAL: KILL A STATICON"
 
 def power_lerp(x, a=1):
@@ -259,7 +259,7 @@ def update_game(dt: float):
             tutorial.text = "TUTORIAL: FIND THE RUNE"
 
 def start_game():
-    main_menu_music.stop()
+    main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
     Audio("audio/ambient.wav", loop=True)
     ground.fade_in(1, duration=3)
     invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
@@ -268,6 +268,7 @@ def start_game():
     start_game_text.disable()
     player.enable()
     player.can_move = False
+    invoke(main_menu_music.stop, delay=1.5)
 
 main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0.75, autoplay=True)
 main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
