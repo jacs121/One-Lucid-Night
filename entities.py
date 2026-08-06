@@ -515,7 +515,7 @@ ground.set_shader_input(
 )
 
 title_text = Text(
-    text="ONE LUCID NIGHT",
+    text=title.upper(),
     origin=(0, -0.35),
     position=(0, 0.35),
     scale=5,

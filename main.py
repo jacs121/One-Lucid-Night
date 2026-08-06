@@ -1,16 +1,10 @@
-import sys
+from ursina import *
 
 print("frozen execution:", getattr(sys, 'frozen', False))
 if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--loggingFile":
     sys.stdout = open(sys.argv[2]+".txt", "w")
 
-from ursina import *
-
 if getattr(sys, 'frozen', False):
-    if hasattr(window, "fps_counter"):
-        window.fps_counter.enabled = False
-    if hasattr(window, "entity_counter"):
-        window.entity_counter.enabled = False
     application.asset_folder = (Path(sys._MEIPASS) / "assets").absolute()
 else:
     application.asset_folder = (Path(__file__).parent  / "assets").absolute()
@@ -21,6 +15,20 @@ from entities import *
 from items import *
 from enemies import *
 from runes import *
+
+hwnd = ctypes.windll.user32.FindWindowW(None, title)
+
+icon = ctypes.windll.user32.LoadImageW(
+    None,
+    application.asset_folder.as_posix() + "/icons/icon.ico",
+    1,
+    0,
+    0,
+    0x00000010
+)
+
+ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
+ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
 
 def input(key):
     global enemies, main_menu, tutorial_enemy
@@ -311,5 +319,10 @@ def update():
     if void_fade_in.finished:
         if start_game_text.color.a == 0:
             start_game_text.fade_in(duration=1)
+
+window.fps_counter.enabled = False
+window.entity_counter.enabled = False
+window.exit_button.enabled = False
+window.collider_counter.enabled = False
 
 app.run()

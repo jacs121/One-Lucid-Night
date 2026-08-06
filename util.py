@@ -1,6 +1,7 @@
 from imports import *
 
-app = Ursina()
+title = "One Lucid Night"
+app = Ursina(title)
 
 def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')
@@ -129,3 +130,8 @@ runes: list = []
 
 main_menu = True
 tutorial_enemy = None
+
+HWND_BROADCAST = 0xffff
+WM_SETICON = 0x0080
+ICON_SMALL = 0
+ICON_BIG = 1
