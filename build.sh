@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-PLATFORM=$1
+PLATFORM="${1:-}"
+if [ -z "$PLATFORM" ]; then
+    echo "Usage: $0 {windows|linux|macos}"
+    exit 1
+fi
 
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 pyinstaller \
     --noconfirm \
@@ -46,16 +50,17 @@ linux)
 ;;
 
 macos)
+    cd dist
+
     ditto \
         -c \
         -k \
         --keepParent \
-        dist/one-lucid-night.app \
-        releases/one-lucid-night-macos.zip
+        one-lucid-night.app \
+        ../releases/one-lucid-night-macos.zip
 
     tar -czf \
-        releases/one-lucid-night-macos.tar.gz \
-        -C dist \
+        ../releases/one-lucid-night-macos.tar.gz \
         one-lucid-night.app
 ;;
 
@@ -69,5 +74,11 @@ macos)
 esac
 
 cd releases
-sha256sum * > SHA256SUMS.txt
+
+if command -v sha256sum >/dev/null; then
+    sha256sum *
+else
+    shasum -a 256 *
+fi > SHA256SUMS.txt
+
 cd ..
