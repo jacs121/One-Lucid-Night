@@ -22,69 +22,67 @@ mkdir -p releases
 case "$PLATFORM" in
 
 windows)
-    cd dist
+cd dist
 
-    python <<-'PY'
-    import shutil
+python <<-'PY'
+import shutil
 
-    shutil.make_archive(
-        "../releases/one-lucid-night-windows",
-        "zip",
-        "one-lucid-night"
-    )
+shutil.make_archive(
+    "../releases/one-lucid-night-windows",
+    "zip",
+    "one-lucid-night"
+)
 
-    shutil.make_archive(
-        "../releases/one-lucid-night-windows",
-        "gztar",
-        "one-lucid-night"
-    )
+shutil.make_archive(
+    "../releases/one-lucid-night-windows",
+    "gztar",
+    "one-lucid-night"
+)
 PY
 
     cd ..
 ;;
 
 linux)
-    cd dist
+cd dist
 
-    python - <<'PY'
-    import shutil
+python - <<'PY'
+import shutil
 
-    shutil.make_archive(
-        "../releases/one-lucid-night-linux",
-        "zip",
-        "one-lucid-night"
-    )
+shutil.make_archive(
+    "../releases/one-lucid-night-linux",
+    "zip",
+    "one-lucid-night"
+)
 
-    shutil.make_archive(
-        "../releases/one-lucid-night-linux",
-        "gztar",
-        "one-lucid-night"
-    )
+shutil.make_archive(
+    "../releases/one-lucid-night-linux",
+    "gztar",
+    "one-lucid-night"
+)
 PY
 
 cd ..
-
-    cd ..
 ;;
 
 macos)
-    cd dist
+cd dist
 
-    ditto \
-        -c \
-        -k \
-        --keepParent \
-        one-lucid-night \
-        ../releases/one-lucid-night-macos.zip
+ditto \
+    -c \
+    -k \
+    --keepParent \
+    one-lucid-night \
+    ../releases/one-lucid-night-macos.zip
 
-    python - <<'PY'
-    import shutil
+python - <<'PY'
+import shutil
 
-    shutil.make_archive(
-        "../releases/one-lucid-night-macos",
-        "gztar",
-        "one-lucid-night"
-    )
+shutil.make_archive(
+    "../releases/one-lucid-night-macos",
+    "gztar",
+    "one-lucid-night"
+)
 PY
 ;;
 
