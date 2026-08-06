@@ -5,7 +5,7 @@ icon = None
 
 if sys.platform == "darwin":
     icon = "assets/textures/ursina.icns"
-elif sys.platform == "win32":
+else:
     icon = "assets/textures/ursina.ico"
 
 datas = [
