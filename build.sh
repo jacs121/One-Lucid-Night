@@ -1,103 +1,73 @@
 #!/usr/bin/env bash
+set -e
 
 PLATFORM=$1
 
-pip install --no-input pyinstaller numpy panda3d pillow ursina scipy
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+pyinstaller \
+    --noconfirm \
+    --clean \
+    game.spec
+
+
+mkdir -p releases
+
 
 case "$PLATFORM" in
-    windows)
-        SEP=";"
-        ;;
-    linux|macos)
-        SEP=":"
-        ;;
-    *)
-        echo "Usage: build.sh [windows|linux|macos]"
-        exit 1
-        ;;
+
+windows)
+    cd dist
+
+    zip -r \
+        ../releases/one-lucid-night-windows.zip \
+        one-lucid-night
+
+    tar -czf \
+        ../releases/one-lucid-night-windows.tar.gz \
+        one-lucid-night
+
+    cd ..
+;;
+
+linux)
+    cd dist
+
+    zip -r \
+        ../releases/one-lucid-night-linux.zip \
+        one-lucid-night
+
+    tar -czf \
+        ../releases/one-lucid-night-linux.tar.gz \
+        one-lucid-night
+
+    cd ..
+;;
+
+macos)
+    ditto \
+        -c \
+        -k \
+        --keepParent \
+        dist/one-lucid-night.app \
+        releases/one-lucid-night-macos.zip
+
+    tar -czf \
+        releases/one-lucid-night-macos.tar.gz \
+        -C dist \
+        one-lucid-night.app
+;;
+
+*)
+
+    echo "Unknown platform: $PLATFORM"
+    exit 1
+
+;;
+
 esac
 
-DATA_PAIRS=(
-    "models/conctus:models/conctus"
-    "models/conctus.glb:models"
-    "models/maime:models/maime"
-    "models/maime.glb:models"
-    "models/obeliskus:models/obeliskus"
-    "models/obeliskus.glb:models"
-    "models/player:models/player"
-    "models/player.glb:models"
-    "models/staticon:models/staticon"
-    "models/staticon.glb:models"
-    "models/conctus/animated.glb:models/conctus"
-    "models/maime/animation.glb:models/maime"
-    "models/maime/basic.fbx:models/maime"
-    "models/player/idle.fbx:models/player"
-    "models/player/walk:models/player/walk"
-    "models/staticon/animations.glb:models/staticon"
-    "models/staticon/base.fbx:models/staticon"
-    "models/player/walk/backwards.fbx:models/player/walk"
-    "models/player/walk/forwards.fbx:models/player/walk"
-    "models/player/walk/left.fbx:models/player/walk"
-    "models/player/walk/right.fbx:models/player/walk"
-    "textures/crosshair.png:textures"
-    "textures/crosshair_ring.png:textures"
-    "textures/reloading:textures/reloading"
-    "textures/shotgun.png:textures"
-    "textures/shotgun_pump.png:textures"
-    "textures/reloading/close_chamber.png:textures/reloading"
-    "textures/reloading/continue.png:textures/reloading"
-    "textures/reloading/get_bullet.png:textures/reloading"
-    "textures/reloading/insert_bullet.png:textures/reloading"
-    "audio/ambient.wav:audio"
-    "audio/dialog_pop.mp3:audio"
-    "audio/main_menu.wav:audio"
-    "audio/runes:audio/runes"
-    "audio/shotgun:audio/shotgun"
-    "audio/spider:audio/spider"
-    "audio/step.mp3:audio"
-    "audio/runes/advancing_rune.mp3:audio/runes"
-    "audio/shotgun/clink.mp3:audio/shotgun"
-    "audio/shotgun/close_chamber.mp3:audio/shotgun"
-    "audio/shotgun/empty_clink.mp3:audio/shotgun"
-    "audio/shotgun/insert_bullet.mp3:audio/shotgun"
-    "audio/shotgun/pump_back.mp3:audio/shotgun"
-    "audio/shotgun/pump_forth.mp3:audio/shotgun"
-    "audio/spider/death.mp3:audio/spider"
-    "audio/spider/hit.mp3:audio/spider"
-    "enemies.py:."
-    "entities.py:."
-    "imports.py:."
-    "items.py:."
-    "main.py:."
-    "runes.py:."
-    "util.py:."
-    "waves.json:."
-)
-
-cmd_args=(
-    pyinstaller
-    --noconfirm
-    --onefile
-    --noconsole
-    --name "one-lucid-night-${PLATFORM}"
-    --collect-data "ursina"
-    --collect-data "PIL"
-    --collect-data "panda3d"
-    --collect-all "ursina"
-    --collect-all "PIL"
-    --collect-all "panda3d"
-)
-
-for pair in "${DATA_PAIRS[@]}"; do
-    cmd_args+=( --add-data="${pair/:/$SEP}" )
-done
-
-if [ "$PLATFORM" = "linux" ]; then
-    cmd_args+=( --noupx )
-fi
-
-cmd_args+=( --clean main.py )
-
-echo "Running: ${cmd_args[*]}"
-
-exec "${cmd_args[@]}"
+cd releases
+sha256sum * > SHA256SUMS.txt
+cd ..

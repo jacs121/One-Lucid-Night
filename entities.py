@@ -77,9 +77,9 @@ class Player(Entity):
         
         rad = -math.radians(self.rotation_y)
         if self.shotgun_ready:
-            self.rotation_y = math.degrees(
+            self.rotation_y = lerp_angle(math.degrees(
                 math.atan2(-mouse.y, mouse.x)
-            )
+            ), dt)
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
 
         if not tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":

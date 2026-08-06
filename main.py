@@ -7,13 +7,15 @@ if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--lo
 from ursina import *
 
 if getattr(sys, 'frozen', False):
-    if window.fps_counter:
+    if hasattr(window, "fps_counter"):
         window.fps_counter.enabled = False
-    if window.entity_counter:
+    if hasattr(window, "entity_counter"):
         window.entity_counter.enabled = False
-    application.asset_folder = Path(sys._MEIPASS).absolute()
+    application.asset_folder = (Path(sys._MEIPASS) / "assets").absolute()
 else:
-    application.asset_folder = Path(__file__).parent.absolute()
+    application.asset_folder = (Path(__file__).parent  / "assets").absolute()
+
+print("assets located at:", application.asset_folder)
 
 from entities import *
 from items import *
@@ -174,7 +176,7 @@ def dialogCallback2():
     shotgun.color = color.white
     crosshair.fade_in()
     crosshair_ring.color = color.rgba(255, 60, 60, 0)
-    crosshair_ring.animate_color(color.rgba32(255, 60, 60, 80), 2)
+    crosshair_ring.animate_color(color.rgba32(255, 60, 60, 80), 2, curve=curve.linear)
     
     ShowDialog("I cant wake up too.").dialog_callback = dialogCallback3
 
@@ -184,8 +186,8 @@ def dialogCallback1():
     ground.color = color.gray
     shotgun_pump.color = color.rgba(0,0,0,0)
     shotgun.color = color.rgba(0,0,0,0)
-    shotgun_pump.animate_color(color.white, 0.5)
-    shotgun.animate_color(color.white, 0.5)
+    shotgun_pump.animate_color(color.white, 0.5, curve=curve.linear)
+    shotgun.animate_color(color.white, 0.5, curve=curve.linear)
     
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
@@ -267,7 +269,8 @@ def start_game():
     player.enable()
     player.can_move = False
 
-main_menu_music = Audio("audio/main_menu.wav", loop=True, volume=0.75, autoplay=True)
+main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0.75, autoplay=True)
+main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
 
 def update():
     global void_noise_timer

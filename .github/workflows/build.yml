@@ -1,75 +1,76 @@
 name: Build and Release
-
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 1.0.0)'
+        description: "Release version"
         required: true
       body:
-        description: 'Release Description'
+        description: "Release description"
         default: ""
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+
     runs-on: ${{ matrix.os }}
-    
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.12"
 
-      - name: Build (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Build
         shell: bash
-        run: bash build.sh windows
+        run: |
+          chmod +x build.sh
+          bash build.sh \
+            ${{ 
+            matrix.os == 'windows-latest' && 'windows' ||
+            matrix.os == 'ubuntu-latest' && 'linux' ||
+            'macos'
+            }}
 
-      - name: Build (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: bash build.sh linux
-
-      - name: Upload artifact
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
-          path: dist/*
+          name: ${{ matrix.os }}
+          path: |
+            releases/*.tar.gz
+            releases/*.zip
 
   release:
     needs: build
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    
-    steps:
-      - name: Download Windows build
-        if: matrix.os == 'windows-latest'
-        uses: actions/download-artifact@v4
-        with:
-          name: build-windows-latest
-          path: windows
-      
-      - name: Download Linux build
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/download-artifact@v4
-        with:
-          name: build-ubuntu-latest
-          path: linux
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: release-files
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.event.inputs.version }}
           name: Release v${{ github.event.inputs.version }}
-          body: ${{github.event.inputs.body}}
+          body: ${{ github.event.inputs.body }}
           files: |
-            windows/*
-            linux/*
+            release-files/*.tar.gz
+            release-files/*.zip
           generate_release_notes: true

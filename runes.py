@@ -31,7 +31,7 @@ class Rune(Entity):
         self.size = size
         if self.enabled:
             self.scale = Vec3(0)
-            self.animate_scale(Vec3(size,1,size), 1)
+            self.animate_scale(Vec3(size,1,size), 1, curve=curve.linear)
 
     def update_rune(self, dt):
         global runes
