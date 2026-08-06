@@ -56,12 +56,12 @@ macos)
         -c \
         -k \
         --keepParent \
-        one-lucid-night.app \
+        one-lucid-night \
         ../releases/one-lucid-night-macos.zip
 
     tar -czf \
         ../releases/one-lucid-night-macos.tar.gz \
-        one-lucid-night.app
+        one-lucid-night
 ;;
 
 *)

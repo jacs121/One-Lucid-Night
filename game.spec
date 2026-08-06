@@ -1,4 +1,12 @@
 from PyInstaller.utils.hooks import collect_all
+import sys
+
+icon = None
+
+if sys.platform == "darwin":
+    icon = "assets/icon.icns"
+elif sys.platform == "win32":
+    icon = "assets/icon.ico"
 
 datas = [
     ("assets", "assets"),
@@ -52,9 +60,10 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
+    exclude_binaries=True,
     name="one-lucid-night",
     console=False,
-    icon="assets/icon.icns",
+    icon=icon,
 )
 
 
@@ -62,6 +71,7 @@ coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
+    a.zipfiles,
     strip=False,
     upx=False,
     name="one-lucid-night",
