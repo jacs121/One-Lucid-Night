@@ -1,4 +1,5 @@
 name: Build and Release
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +14,23 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: macos-14
+            name: macos-arm64
+            platform: macos
+
+          - os: macos-13
+            name: macos-x86_64
+            platform: macos
+
+          - os: ubuntu-latest
+            name: linux
+            platform: linux
+
+          - os: windows-latest
+            name: windows
+            platform: windows
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -27,23 +44,32 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          key: pip-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+
+          # Prevent architecture-mismatched Panda3D wheels
+          python -m pip uninstall -y panda3d panda3d-gltf ursina || true
+
+          python -m pip install --no-cache-dir -r requirements.txt
+
+          python -c "import platform; print('Architecture:', platform.machine())"
 
       - name: Build
         shell: bash
         run: |
           chmod +x build.sh
-          bash build.sh \
-            ${{ 
-            matrix.os == 'windows-latest' && 'windows' ||
-            matrix.os == 'ubuntu-latest' && 'linux' ||
-            'macos'
-            }}
+          python -m PyInstaller --version
+
+          bash build.sh ${{ matrix.platform }}
 
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}
+          name: ${{ matrix.name }}
           path: |
             releases/*.tar.gz
             releases/*.zip

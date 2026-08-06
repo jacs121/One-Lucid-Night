@@ -10,7 +10,7 @@ fi
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-pyinstaller \
+python -m PyInstaller \
     --noconfirm \
     --clean \
     game.spec
