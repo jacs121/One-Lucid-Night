@@ -4,9 +4,9 @@ import sys
 icon = None
 
 if sys.platform == "darwin":
-    icon = "assets/icon.icns"
+    icon = "assets/textures/icon.icns"
 elif sys.platform == "win32":
-    icon = "assets/icon.ico"
+    icon = "assets/textures/icon.ico"
 
 datas = [
     ("assets", "assets"),
