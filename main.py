@@ -123,7 +123,7 @@ def power_lerp(x, a=1):
     return 1-math.log(math.cosh((1-2*x)/a))+math.log(math.cosh(1/a))-1
 
 available_items = [ammoBox, medicine, fullMedicineKit]
-available_runes = [HarmRune, WhisperRune, AdvancingRune, sharpenRune]
+available_runes = [HarmRune, WhisperRune, sharpenRune]
 available_enemies = [Staticon, Obeliskus, Maime]
 
 wave_filepath = "./waves.json"
@@ -262,7 +262,7 @@ def update_game(dt: float):
         rune.update_rune(dt)
 
     if alive_enemies == 0 and not waiting_to_advance and tutorial.text == "TUTORIAL: KILL A STATICON":
-        runes.append(AdvancingRune(enabled=True))
+        runes.append(AdvancingRune((random.uniform(left + 2, right - 2), 1, random.uniform(top + 2, bottom - 2))))
         waiting_to_advance = True
 
         if not tutorial_ended:

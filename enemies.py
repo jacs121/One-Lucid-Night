@@ -73,6 +73,10 @@ class Enemy(Entity):
             trigger_screen_shift()
         else:
             trigger_screen_fade()
+    
+    def update(self):
+        self.position.x = clamp(self.position.x, BOUNDARY_REGION[0]+self.scale.x, BOUNDARY_REGION[2]-self.scale.x)
+        self.position.z = clamp(self.position.z, BOUNDARY_REGION[1]+self.scale.z, BOUNDARY_REGION[3]-self.scale.z)
 
 class Staticon(Enemy):
     def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True):

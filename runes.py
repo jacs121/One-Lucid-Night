@@ -2,12 +2,11 @@ from util import *
 from entities import player
 
 class Rune(Entity):
-    def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 1, activation_distance: int = 1, required_experience: float = 0, uses: int = -1, enabled: bool = False):
+    def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 0.5, activation_distance: int = 1, required_experience: float = 0, uses: int = -1):
         super().__init__(
             model="cube",
             scale=(size, 1, size),
-            position=position,
-            enabled=enabled
+            position=position
         )
 
         self.uses = uses
@@ -59,8 +58,8 @@ class Rune(Entity):
         pass
 
 class WhisperRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 3, enabled: bool = False, required_experience: float = 5):
-        super().__init__("Whisper Rune", position, uses=uses, enabled=enabled, required_experience=required_experience)
+    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 5):
+        super().__init__("Whisper Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         global dialog_id, dialog_text, dialog_timer
@@ -69,15 +68,15 @@ class WhisperRune(Rune):
         dialog_id = 5
 
 class sharpenRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 3, enabled: bool = False, required_experience: float = 10):
-        super().__init__("Sharpen Rune", position, uses=uses, enabled=enabled, required_experience=required_experience)
+    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
+        super().__init__("Sharpen Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         player.attack_damage += player.attack_damage/5
 
 class HarmRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 2, enabled: bool = False, required_experience: float = 6):
-        super().__init__("Harm Rune", position, uses=uses, enabled=enabled, required_experience=required_experience)
+    def __init__(self, position = (0, 1, 0), uses = 2, required_experience: float = 6):
+        super().__init__("Harm Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         self.required_experience = 10/self.uses
@@ -85,15 +84,15 @@ class HarmRune(Rune):
             enemy.damage(8*self.uses)
 
 class AdvancingRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = -1, enabled = False, required_experience: float = 0):
-        super().__init__("Advancing Rune", position, uses=uses, enabled=enabled, required_experience=required_experience)
+    def __init__(self, position = (0, 1, 0), uses = -1, required_experience: float = 0):
+        super().__init__("Advancing Rune", position, 1, uses=uses, required_experience=required_experience)
         self.color = color.hsv(0, 1, 0.5)
 
         if self.enabled:
             self.sound = Audio('audio/runes/advancing_rune.mp3', autoplay=True, loop=True)
 
     def action(self, dt):
-        global wave_num, items, enemies, runes, game_won, screen_fade_animation, tutorial_ended
+        global wave_num, items, enemies, runes, game_won, screen_fade_animation, tutorial_ended, waiting_to_advance
         
         wave_num += 1
         if wave_num-1 < len(waves):
@@ -110,6 +109,8 @@ class AdvancingRune(Rune):
         else:
             game_won = True
             screen_fade_animation = 1
+
+        waiting_to_advance = False
 
         self.uses = 0
         self.sound.stop()
