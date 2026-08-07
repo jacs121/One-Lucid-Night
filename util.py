@@ -129,7 +129,6 @@ items: list = []
 runes: list = []
 
 main_menu = True
-tutorial_enemy = None
 
 HWND_BROADCAST = 0xffff
 WM_SETICON = 0x0080

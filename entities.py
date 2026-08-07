@@ -81,6 +81,7 @@ class Player(Entity):
                 math.atan2(-mouse.y, mouse.x)
             ), dt*10)
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
+        
 
         if not tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
             if distance_2d(runes[0].position.xz, self.position.xz - self.direction.xz/2) <= runes[0].activation_distance:
@@ -119,7 +120,6 @@ class Player(Entity):
 
                 self.prev_frame_num = self.anim_controls[self.animation].getFrame()
                 self.position += movement * (self.speed * (2 if held_keys["left shift"] else 1)) * dt
-                self.position = Vec3(clamp(self.position.x, BOUNDARY_REGION[0], BOUNDARY_REGION[2]), 0.3, clamp(self.position.z, BOUNDARY_REGION[1], BOUNDARY_REGION[3]))
             elif not self.anim_controls["idle"].playing:
                 self.animation = "idle"
                 self.anim_controls["idle"].play()
@@ -141,6 +141,15 @@ class Player(Entity):
             )
         else:
             camera.position = (self.x, camera.y, self.z)
+    
+        self.position = Vec3(clamp(self.position.x,
+                                    max(BOUNDARY_REGION[0]+self.direction.x, BOUNDARY_REGION[0]),
+                                    min(BOUNDARY_REGION[2]+self.direction.x, BOUNDARY_REGION[2])),
+                            0.3,
+                            clamp(self.position.z,
+                                    max(BOUNDARY_REGION[1]+self.direction.z, BOUNDARY_REGION[1]),
+                                    min(BOUNDARY_REGION[3]+self.direction.z, BOUNDARY_REGION[3]))
+                            )
 
     def shoot(self):
         """Fire the shotgun. Each bullets is ray-cast and checked against the entity."""
@@ -494,7 +503,7 @@ ground = Entity(
 
 void = Entity(
     model='plane',
-    texture=generate_noise_texture("void", max_value=50),
+    texture=generate_noise_texture("void", max_value=25),
     scale=200,
     y=-0.1,
     texture_scale=(5, 5),

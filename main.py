@@ -31,7 +31,7 @@ ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
 
 def input(key):
-    global enemies, main_menu, tutorial_enemy
+    global enemies, main_menu
     if main_menu:
         if key == "space" and void_fade_in.finished:
             print("starting game")
@@ -119,7 +119,7 @@ def input(key):
         player.reload_step = 0
         reload_image.disable()
         ammo_packets_count_ui.disable()
-        if tutorial_enemy == None:
+        if len(enemies) <= 0:
             if player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT:
                 tutorial.text = "TUTORIAL: TOUCH THE ITEM"
                 player.can_move = True
@@ -151,32 +151,37 @@ def element_number_converter(value) -> float:
         return random.choice([element_number_converter(v) for v in value])
     return value
 
-waves_data = json.load(open(wave_filepath))
+def load_waves(filepath: str):
+    waves = []
+    waves_data = json.load(open(filepath, "r"))
 
-for wave_num, wave_data in enumerate(waves_data):
-    waves.append({"items": [], "enemies": [], "runes": []})
-    for element in wave_data:
-        position = element.pop("position")
-        element["position"] = (element_number_converter(position[0]), 1, element_number_converter(position[1]))
-        element_type = element.pop("type")
-        if element_type == "item":
-            elementIndex = random.choice(element.pop("items"))
-            waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
-            waves[-1]["items"][-1].update(element)
-        elif element_type == "rune":
-            elementIndex = random.choice(element.pop("runes"))
-            waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
-            waves[-1]["runes"][-1].update(element)
-        elif element_type == "enemy":
-            elementIndex = random.choice(element.pop("enemies"))
+    for wave_data in waves_data:
+        waves.append({"items": [], "enemies": [], "runes": []})
+        for element in wave_data:
+            position = element.pop("position")
+            element["position"] = (element_number_converter(position[0]), 1, element_number_converter(position[1]))
+            element_type = element.pop("type")
+            if element_type == "item":
+                elementIndex = random.choice(element.pop("items"))
+                waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
+                waves[-1]["items"][-1].update(element)
+            elif element_type == "rune":
+                elementIndex = random.choice(element.pop("runes"))
+                waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
+                waves[-1]["runes"][-1].update(element)
+            elif element_type == "enemy":
+                elementIndex = random.choice(element.pop("enemies"))
 
-            kwargs = {"enemy": available_enemies[elementIndex], "position": position}
-            kwargs.update(element)
-            
-            if kwargs["enemy"] == Maime:
-                kwargs["item"] = {"entity": random.choice(available_items), "position": position}
+                kwargs = {"enemy": available_enemies[elementIndex], "position": position}
+                kwargs.update(element)
+                
+                if kwargs["enemy"] == Maime:
+                    kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
-            waves[-1]["enemies"].append(kwargs)
+                waves[-1]["enemies"].append(kwargs)
+    return waves
+
+waves = load_waves(wave_filepath)
 
 def dialogCallback3():
     global items
@@ -209,12 +214,37 @@ def dialogCallback1():
     
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
+def restart_game():
+    global player, waves, wave_num, game_over, game_won, tutorial_ended, enemies, items, runes, main_menu
+    global tutorial, shotgun_ammo_ui, ammo_packets_count_ui
+    global crosshair, crosshair_ring, update_crosshair
+    global screen_shift_strength, screen_fade_animation, screen_shift
+    global win_text, void_fade_in, void_noise_timer
+    global start_game_text, ground, main_menu_music
+    
+    player = Player()
+    waves = load_waves(wave_filepath)
+    wave_num = 0
+    game_over = game_won = tutorial_ended = False
+
+    enemies = items = runes = []
+
+    main_menu = True
+    from entities import tutorial, shotgun_ammo_ui, ammo_packets_count_ui, \
+        crosshair, crosshair_ring, update_crosshair, \
+        screen_shift_strength, screen_fade_animation, screen_shift, \
+        win_text, void_fade_in, void_noise_timer, \
+        start_game_text, ground
+
+    
+    main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0, autoplay=True)
+    main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
+    main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
+
+
 def update_game(dt: float):
     global screen_shift_strength, screen_fade_animation
     global game_won, waiting_to_advance
-    
-    if tutorial_ended and tutorial.enabled:
-        tutorial.disable()
 
     if screen_fade_animation > 0:
         screen_fade_animation -= dt/10
@@ -234,7 +264,7 @@ def update_game(dt: float):
                 win_text.text = "that night you never woke up"
                 win_text.color = color.rgba(0.5, 0, 0, clamp(- 2*screen_fade_animation - 0.5, 0, 1))
             if screen_fade_animation <= -2:
-                app.userExit()
+                restart_game()
         return
 
     if screen_shift_strength > 0:
@@ -269,8 +299,8 @@ def update_game(dt: float):
     for rune in runes:
         rune.update_rune(dt)
 
-    if alive_enemies == 0 and not waiting_to_advance and tutorial.text == "TUTORIAL: KILL A STATICON":
-        runes.append(AdvancingRune((random.uniform(left + 2, right - 2), 1, random.uniform(top + 2, bottom - 2))))
+    if alive_enemies == 0 and not waiting_to_advance:
+        runes.append(AdvancingRune((random.uniform(left + 2, right - 2), 1, random.uniform(bottom + 2, top - 2))))
         waiting_to_advance = True
 
         if not tutorial_ended:
@@ -287,6 +317,11 @@ def start_game(skip_tutorial: bool = False):
         tutorial_ended = True
         main_menu_music.stop()
         ground.color = color.rgb(*ground.color.rgb, 1)
+        tutorial.text = "TUTORIAL SKIPPED"
+        invoke(tutorial.disable, delay=1)
+        crosshair.enable()
+        crosshair_ring.enable()
+        shotgun.enable()
     else:
         invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
         invoke(main_menu_music.stop, delay=1.5)
@@ -314,7 +349,7 @@ def update():
     void_noise_timer += dt
     if void_noise_timer > 1.5:
         void_noise_timer = 0
-        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)), max_value=50)
+        void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)), max_value=25)
     
     if void_fade_in.finished:
         if start_game_text.color.a == 0:

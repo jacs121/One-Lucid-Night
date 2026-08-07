@@ -4,38 +4,6 @@
             "type": "enemy",
             "enemies": [0],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        },
-        {
-            "type": "enemy",
-            "enemies": [0],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        },
-        {
-            "type": "rune",
-            "runes": [2],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        },
-        {
-            "type": "item",
-            "items": [0,1],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        },
-        {
-            "type": "item",
-            "items": [0],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        }
-    ],
-    [
-        {
-            "type": "enemy",
-            "enemies": [0],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
-        },
-        {
-            "type": "enemy",
-            "enemies": [1],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         }
     ]
 ]
