@@ -1,5 +1,5 @@
 from util import *
-from entities import player
+from entities import player, tutorial, ShowDialog
 
 class Rune(Entity):
     def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 0.5, activation_distance: int = 1, required_experience: float = 0, uses: int = -1):
@@ -33,7 +33,6 @@ class Rune(Entity):
             self.animate_scale(Vec3(size,1,size), 1, curve=curve.linear)
 
     def update_rune(self, dt):
-        global runes
         self.rotation_y += dt*10
         if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance and not self.used and held_keys["space"] and player.experience >= self.required_experience:
             self.used = True
@@ -42,8 +41,8 @@ class Rune(Entity):
             if self.uses > 0:
                 self.uses -= 1
             if self.uses == 0:
-                if self in runes:
-                    runes.remove(self)
+                if self in gameState.runes:
+                    gameState.runes.remove(self)
                 destroy(self)
                 return False
 
@@ -62,10 +61,7 @@ class WhisperRune(Rune):
         super().__init__("Whisper Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
-        global dialog_id, dialog_text, dialog_timer
-        dialog_timer = 0
-        dialog_text = "there are {0} whispers still alive".format(len(enemies))
-        dialog_id = 5
+        ShowDialog("there are {0} whispers still alive".format(len(gameState.enemies)))
 
 class sharpenRune(Rune):
     def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
@@ -80,7 +76,7 @@ class HarmRune(Rune):
 
     def action(self, dt):
         self.required_experience = 10/self.uses
-        for enemy in enemies:
+        for enemy in gameState.enemies:
             enemy.damage(8*self.uses)
 
 class AdvancingRune(Rune):
@@ -92,36 +88,38 @@ class AdvancingRune(Rune):
             self.sound = Audio('audio/runes/advancing_rune.mp3', autoplay=True, loop=True)
 
     def action(self, dt):
-        global wave_num, items, enemies, runes, game_won, screen_fade_animation, tutorial_ended, waiting_to_advance
-        
-        wave_num += 1
-        if wave_num-1 < len(waves):
-            for itemData in waves[wave_num-1]["items"]:
-                items.append(itemData.pop("item")(**itemData))
+        gameState.wave_num += 1
+        if gameState.wave_num-1 < len(gameState.waves):
+            for itemData in gameState.waves[gameState.wave_num-1]["items"]:
+                gameState.items.append(itemData.pop("item")(**itemData))
 
-            for enemyData in waves[wave_num-1]["enemies"]:
+            for enemyData in gameState.waves[gameState.wave_num-1]["enemies"]:
                 if "item" in enemyData.keys():
                     enemyData["item"] = enemyData["item"].pop("entity")(**enemyData["item"])
-                enemies.append(enemyData.pop("enemy")(**enemyData))
+                gameState.enemies.append(enemyData.pop("enemy")(**enemyData))
 
-            for runeData in waves[wave_num-1]["runes"]:
-                runes.append(runeData.pop("rune")(**runeData))
+            for runeData in gameState.waves[gameState.wave_num-1]["runes"]:
+                gameState.runes.append(runeData.pop("rune")(**runeData))
         else:
-            game_won = True
-            screen_fade_animation = 1
+            gameState.screen_fade_animation = 1
+            gameState.game_won = True
+            return False
 
-        waiting_to_advance = False
+        gameState.waiting_to_advance = False
+        print("advancing wave to #"+str(gameState.wave_num))
 
         self.uses = 0
         self.sound.stop()
-        if not tutorial_ended:
-            tutorial_ended = True
+        if not gameState.tutorial_ended:
+            gameState.tutorial_ended = True
+            tutorial.text = ""
+        return True
 
     def update_rune(self, dt):
         if super().update_rune(dt):
             panning = (self.x - camera.x) / 10
-            self.sound.balance = clamp(panning, -1, 1)
+            self.sound.balance = clamp(panning, -2, 2)
 
             distance = distance_xz(self.position, camera.position)
-            self.color = color.hsv(0, 1, 0.5*(1-1/distance) if distance > 0 else 0)
-            self.sound.volume = clamp(1 / (1 + distance * 0.1), 0, 1)
+            self.color = color.hsv(0, 1-1/(distance + 1.5), 1)
+            self.sound.volume = 1 - clamp(distance / distance_2d(Vec2(BOUNDARY_REGION[0], BOUNDARY_REGION[1]), Vec2(BOUNDARY_REGION[2], BOUNDARY_REGION[3])), 0, 1)

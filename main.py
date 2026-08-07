@@ -16,30 +16,15 @@ from items import *
 from enemies import *
 from runes import *
 
-hwnd = ctypes.windll.user32.FindWindowW(None, title)
-
-icon = ctypes.windll.user32.LoadImageW(
-    None,
-    application.asset_folder.as_posix() + "/icons/icon.ico",
-    1,
-    0,
-    0,
-    0x00000010
-)
-
-ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
-ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
-
 def input(key):
-    global enemies, main_menu
-    if main_menu:
+    if gameState.main_menu:
         if key == "space" and void_fade_in.finished:
             print("starting game")
-            main_menu = False
+            gameState.main_menu = False
             start_game()
         elif key == "enter" and void_fade_in.finished:
             print("starting game")
-            main_menu = False
+            gameState.main_menu = False
             start_game(True)
         return
 
@@ -48,7 +33,7 @@ def input(key):
             player.shoot()
         elif key == "left mouse down" and player.shotgun_ammo_count == 0:
             Audio("audio/shotgun/empty_clink.mp3")
-        elif key == 'r' and (player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and tutorial_ended or tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN"):
+        elif key == 'r' and (player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN"):
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
@@ -65,7 +50,7 @@ def input(key):
                 ammo_packets_count_ui.text = "[OUT OF AMMO PACKETS]"
                 player.reload_step = 3
                 reload_image.texture = '/textures/reloading/close_chamber.png'
-        elif key == 'c' and (tutorial_ended or tutorial.text == "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"):
+        elif key == 'c' and (gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"):
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
@@ -107,7 +92,7 @@ def input(key):
             player.reload_step = 3
             reload_image.texture = '/textures/reloading/close_chamber.png'
 
-    if (player.reload_step == 3 or (player.reload_step == 1 and tutorial_ended)) and (key == 'up arrow up' or key == "w up"):
+    if (player.reload_step == 3 or (player.reload_step == 1 and gameState.tutorial_ended)) and (key == 'up arrow up' or key == "w up"):
         tutorial.text = "TUTORIAL: PRESS ESCAPE TO GO BACK"
         Audio("audio/shotgun/close_chamber.mp3")
         reload_image.texture = '/textures/reloading/continue.png'
@@ -119,12 +104,12 @@ def input(key):
         player.reload_step = 0
         reload_image.disable()
         ammo_packets_count_ui.disable()
-        if len(enemies) <= 0:
+        if len(gameState.enemies) <= 0:
             if player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT:
                 tutorial.text = "TUTORIAL: TOUCH THE ITEM"
                 player.can_move = True
             else:
-                enemies.append(Staticon((15, 0.3, 15)))
+                gameState.enemies.append(Staticon((15, 0.3, 15)))
                 tutorial.text = "TUTORIAL: KILL A STATICON"
 
 def power_lerp(x, a=1):
@@ -179,18 +164,18 @@ def load_waves(filepath: str):
                     kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
                 waves[-1]["enemies"].append(kwargs)
+
     return waves
 
-waves = load_waves(wave_filepath)
+gameState.waves = load_waves(wave_filepath)
 
 def dialogCallback3():
-    global items
 
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"
-    items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-    items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    gameState.items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    gameState.items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
 
 def dialogCallback2():
     crosshair.enabled=True
@@ -215,65 +200,60 @@ def dialogCallback1():
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
 def restart_game():
-    global player, waves, wave_num, game_over, game_won, tutorial_ended, enemies, items, runes, main_menu
+    global gameState
+
     global tutorial, shotgun_ammo_ui, ammo_packets_count_ui
-    global crosshair, crosshair_ring, update_crosshair
-    global screen_shift_strength, screen_fade_animation, screen_shift
-    global win_text, void_fade_in, void_noise_timer
+    global crosshair, crosshair_ring, player
+    global screen_shift, win_text, void_fade_in
     global start_game_text, ground, main_menu_music
     
+    destroy(player)
     player = Player()
-    waves = load_waves(wave_filepath)
-    wave_num = 0
-    game_over = game_won = tutorial_ended = False
+    for rune in gameState.runes:
+        rune.sound.stop()
+        destroy(rune)
+ 
+    for entity in gameState.enemies+gameState.items:
+        destroy(entity)
 
-    enemies = items = runes = []
+    gameState = GameState.default()
+    gameState.waves = load_waves(wave_filepath)
 
-    main_menu = True
-    from entities import tutorial, shotgun_ammo_ui, ammo_packets_count_ui, \
-        crosshair, crosshair_ring, update_crosshair, \
-        screen_shift_strength, screen_fade_animation, screen_shift, \
-        win_text, void_fade_in, void_noise_timer, \
-        start_game_text, ground
+    init_entities()
 
-    
     main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0, autoplay=True)
     main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
     main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 
-
 def update_game(dt: float):
-    global screen_shift_strength, screen_fade_animation
-    global game_won, waiting_to_advance
-
-    if screen_fade_animation > 0:
-        screen_fade_animation -= dt/10
-        screen_shift.color = color.rgba((power_lerp(1-screen_fade_animation) if screen_fade_animation > 0 else 0), 0, 0, 1 - screen_fade_animation)
+    if gameState.screen_fade_animation > 0:
+        gameState.screen_fade_animation -= dt/10
+        screen_shift.color = color.rgba(gameState.game_over*(power_lerp(1-gameState.screen_fade_animation) if gameState.screen_fade_animation > 0 else 0), 0, 0, 1 - gameState.screen_fade_animation)
         if crosshair.enabled:
             crosshair.disable()
         if crosshair_ring.enabled:
             crosshair_ring.disable()
 
-    if game_over or game_won:
-        if screen_fade_animation <= 0:
-            screen_fade_animation -= dt
-            if game_won:
+    if gameState.game_over or gameState.game_won:
+        if gameState.screen_fade_animation <= 0:
+            gameState.screen_fade_animation -= dt
+            if gameState.game_won:
                 win_text.text = "you wake up in a cold sweat"
-                win_text.color = color.rgba(0, 0, 0, clamp(- 2*screen_fade_animation - 0.5, 0, 1))
+                win_text.color = color.rgba(1, 1, 1, clamp(- 2*gameState.screen_fade_animation - 0.5, 0, 1))
             else:
                 win_text.text = "that night you never woke up"
-                win_text.color = color.rgba(0.5, 0, 0, clamp(- 2*screen_fade_animation - 0.5, 0, 1))
-            if screen_fade_animation <= -2:
+                win_text.color = color.rgba(0.5, 0, 0, clamp(- 2*gameState.screen_fade_animation - 0.5, 0, 1))
+            if gameState.screen_fade_animation <= -2:
                 restart_game()
         return
 
-    if screen_shift_strength > 0:
-        screen_shift_strength -= dt
+    if gameState.screen_shift_strength > 0:
+        gameState.screen_shift_strength -= dt
         screen_shift.color = color.rgba(
             1,
             0,
             0,
-            screen_shift_strength
+            gameState.screen_shift_strength
         )
     else:
         screen_shift.color = color.rgba(0, 0, 0, 0)
@@ -287,34 +267,49 @@ def update_game(dt: float):
         player.z
     )
 
-    alive_enemies = 0
-    for entity in enemies:
-        entity.update_entity(dt)
-        if entity.health > 0:
-            alive_enemies += 1
+    gameState.alive_enemies = 0
+    for enemy in gameState.enemies:
+        if enemy.health > 0:
+            gameState.alive_enemies += 1
+        enemy.update_entity(dt)
 
-    for item in items:
+    for item in gameState.items:
         item.update_item(dt)
 
-    for rune in runes:
+    for rune in gameState.runes:
         rune.update_rune(dt)
 
-    if alive_enemies == 0 and not waiting_to_advance:
-        runes.append(AdvancingRune((random.uniform(left + 2, right - 2), 1, random.uniform(bottom + 2, top - 2))))
-        waiting_to_advance = True
+    if gameState.alive_enemies == 0 and not gameState.waiting_to_advance:
+        print("waiting to advance wave to #"+str(gameState.wave_num+1))
+        gameState.runes.append(AdvancingRune((random.uniform(left + 10, right - 10), 1, random.uniform(bottom + 10, top - 10))))
+        gameState.waiting_to_advance = True
 
-        if not tutorial_ended:
+        if not gameState.tutorial_ended:
             tutorial.text = "TUTORIAL: FIND THE RUNE"
 
-def start_game(skip_tutorial: bool = False):
-    global items, enemies, tutorial_ended
+    elif gameState.alive_enemies > 0 and gameState.waiting_to_advance:
+        advancing_runes = [r for r in gameState.runes if isinstance(r, AdvancingRune)]
+        for rune in advancing_runes:
+            try:
+                gameState.runes.remove(rune)
+            except ValueError:
+                pass
+            if hasattr(rune, 'sound') and rune.sound:
+                try:
+                    rune.sound.stop()
+                except Exception:
+                    pass
+            destroy(rune)
+            print("deleting unneeded advancing rune")
+        gameState.waiting_to_advance = False
 
+def start_game(skip_tutorial: bool = False):
     Audio("audio/ambient.wav", loop=True)
     if skip_tutorial:
-        items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-        items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-        enemies.append(Staticon((15, 0.3, 15)))
-        tutorial_ended = True
+        gameState.items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        gameState.items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        gameState.enemies.append(Staticon((15, 0.3, 15)))
+        gameState.tutorial_ended = True
         main_menu_music.stop()
         ground.color = color.rgb(*ground.color.rgb, 1)
         tutorial.text = "TUTORIAL SKIPPED"
@@ -322,15 +317,16 @@ def start_game(skip_tutorial: bool = False):
         crosshair.enable()
         crosshair_ring.enable()
         shotgun.enable()
+        title_text.disable()
     else:
         invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
         invoke(main_menu_music.stop, delay=1.5)
         ground.fade_in(1, duration=3)
         main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
         main_menu_music.animate("volume", 0, 1.5, curve=curve.linear)
+        title_text.fade_out()
 
     void_fade_in.finish()
-    title_text.fade_out()
     start_game_text.disable()
     player.enable()
     player.can_move = skip_tutorial
@@ -340,17 +336,16 @@ main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
 main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 
 def update():
-    global void_noise_timer
     dt = time.dt
 
-    if not main_menu:
+    if not gameState.main_menu:
         update_game(dt)
 
-    void_noise_timer += dt
-    if void_noise_timer > 1.5:
-        void_noise_timer = 0
+    gameState.void_noise_timer += dt
+    if gameState.void_noise_timer > 1.5:
+        gameState.void_noise_timer = 0
         void.texture = generate_noise_texture("void_"+ str(int(random.random()*10)), max_value=25)
-    
+
     if void_fade_in.finished:
         if start_game_text.color.a == 0:
             start_game_text.fade_in(duration=1)
@@ -359,5 +354,6 @@ window.fps_counter.enabled = False
 window.entity_counter.enabled = False
 window.exit_button.enabled = False
 window.collider_counter.enabled = False
+window.cog_button.enabled = False
 
 app.run()

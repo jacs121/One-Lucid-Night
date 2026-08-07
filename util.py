@@ -49,6 +49,35 @@ def generate_triangle_texture(seed: str, width=512, height=512):
     
     return Texture(draw)
 
+@dataclass
+class GameState:
+    enemies: list
+    items: list
+    runes: list
+    
+    wave_num: int
+    game_over: bool
+    game_won: bool
+    tutorial_ended: bool
+
+    main_menu: bool
+
+    waves: list[dict[str, list]]
+    waiting_to_advance: bool
+    update_crosshair: bool
+    
+    screen_fade_animation: float
+    screen_shift_strength: float
+    screen_fade_timer: float
+    void_noise_timer: float
+    
+    alive_enemies: int
+    
+    @classmethod
+    def default(cls):
+        return cls([], [], [], 0, False, False, False, True, [], False, False, 0, 0, 0, 0, 0)
+
+gameState = GameState.default()
 
 GROUND_NOISE_SCALE = 3.5
 
@@ -118,19 +147,21 @@ PUMP_TARGET = 0.75
 PUMP_MIN_STROKE = 0.15
 PUMP_STROKES_NEEDED = 2
 
-waves: list[dict[str, list]] = []
-waiting_to_advance = False
-
-wave_num = 0
-game_over = game_won = tutorial_ended = False
-
-enemies: list = []
-items: list = []
-runes: list = []
-
-main_menu = True
-
 HWND_BROADCAST = 0xffff
 WM_SETICON = 0x0080
 ICON_SMALL = 0
 ICON_BIG = 1
+
+hwnd = ctypes.windll.user32.FindWindowW(None, title)
+
+icon = ctypes.windll.user32.LoadImageW(
+    None,
+    application.asset_folder.as_posix() + "/icons/icon.ico",
+    1,
+    0,
+    0,
+    0x00000010
+)
+
+ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
+ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)

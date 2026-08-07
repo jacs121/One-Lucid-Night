@@ -70,9 +70,10 @@ class Enemy(Entity):
         damage_mul = self.scale.length()*(1-(self.max_health/self.health if self.health > 0 else 0))
         player.health = max(player.health - damage_mul*damage, 0)
         if player.health > 0:
-            trigger_screen_shift()
+            gameState.screen_shift_strength = 0.5
         else:
-            trigger_screen_fade()
+            gameState.game_over = True
+            gameState.screen_fade_timer = 1
     
     def update(self):
         self.position.x = clamp(self.position.x, BOUNDARY_REGION[0]+self.scale.x, BOUNDARY_REGION[2]-self.scale.x)
@@ -419,12 +420,3 @@ class Maime(Enemy):
 
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
-
-def trigger_screen_shift():
-    global screen_shift_strength
-    screen_shift_strength = 0.5
-
-def trigger_screen_fade():
-    global screen_fade_timer, game_over
-    game_over = True
-    screen_fade_timer = 1

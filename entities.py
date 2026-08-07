@@ -83,8 +83,8 @@ class Player(Entity):
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
         
 
-        if not tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
-            if distance_2d(runes[0].position.xz, self.position.xz - self.direction.xz/2) <= runes[0].activation_distance:
+        if not gameState.tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
+            if distance_2d(gameState.runes[0].position.xz, self.position.xz - self.direction.xz/2) <= gameState.runes[0].activation_distance:
                 tutorial.text = "TUTORIAL: INTERACT WITH A RUNE BY PRESSING SPACE"
 
         if not self.reloading:
@@ -178,7 +178,7 @@ class Player(Entity):
             dir_z =  math.sin(bullets_angle)
 
             hit = False
-            for entity in enemies:
+            for entity in gameState.enemies:
                 dx = entity.x - self.x
                 dz = entity.z - self.z
                 
@@ -301,7 +301,7 @@ class Player(Entity):
         )
 
         if self.shotgun_pumping:
-            if update_crosshair == True:
+            if gameState.update_crosshair == True:
                 crosshair.color = color.rgb32(255, 0, 0)
             crosshair_ring.color = color.rgb32(255, 0, 0)
             
@@ -312,7 +312,7 @@ class Player(Entity):
             pump_bar_fill.x = 0
             pump_bar_fill.color = color.rgba32(255, 200, 50, 220)
         elif self.shotgun_ready:
-            if update_crosshair == True:
+            if gameState.update_crosshair == True:
                 crosshair.color = color.rgb32(200, 200, 200)
                 crosshair_ring.color = color.rgb32(200, 200, 200)
             
@@ -331,27 +331,6 @@ class Player(Entity):
         self.last_mouse_y = mouse.y
 
 player = Player()
-
-reload_image = Entity(
-    parent=camera.ui,
-    model='quad',
-    texture='textures/reloading/get_bullet.png',
-    scale=(87/100, 13/100),
-    position=(0, 0),
-    color=color.white,
-    enabled=False
-)
-
-shotgun = Entity(
-    parent=player,
-    model='quad',
-    texture="textures/shotgun.png",
-    scale=(1.125, 0.125),
-    position=(0, 1.512, 0),
-    rotation=(90, 0, 0),
-    unlit=True,
-    enabled=False
-)
 
 def reposition():
     shotgun_ammo_ui.x = -window.aspect_ratio / 2 + .02
@@ -392,148 +371,221 @@ class ShowDialog(Entity):
     def dialog_callback(self):
         pass
 
-tutorial = Text(
-    text="",
-    color=color.yellow,
-    origin=(-0.5, -0.5),
-    position=(-0.5, -0.475),
-)
+def init_entities():
+    global tutorial, shotgun, shotgun_ammo_ui
+    global shotgun_pump, ammo_packets_count_ui, crosshair
+    global crosshair_ring, pump_bar_bg, pump_bar_fill
+    global screen_shift, win_text, void_fade_in
+    global title_text, start_game_text, void
+    global ground, reload_image
 
-shotgun_ammo_ui = Text(
-    text="AMMO: 0/0",
-    color=color.orange if player.shotgun_ammo_count > 0 else color.red,
-    origin=(-0.5, 0.5),
-    position=(-0.5, 0.45),
-    enabled=False
-)
+    if "tutorial" in globals():
+        destroy(tutorial)
+    
+    if "reload_image" in globals():
+        destroy(reload_image)
+        
+    if "shotgun" in globals():
+        destroy(shotgun)
+        
+    if "shotgun_ammo_ui" in globals():
+        destroy(shotgun_ammo_ui)
+        
+    if "shotgun_pump" in globals():
+        destroy(shotgun_pump)
+        
+    if "ammo_packets_count_ui" in globals():
+        destroy(ammo_packets_count_ui)
+        
+    if "crosshair" in globals():
+        destroy(crosshair)
+        
+    if "crosshair_ring" in globals():
+        destroy(crosshair_ring)
+        
+    if "pump_bar_bg" in globals():
+        destroy(pump_bar_bg)
+        
+    if "pump_bar_fill" in globals():
+        destroy(pump_bar_fill)
+        
+    if "screen_shift" in globals():
+        destroy(screen_shift)
+        
+    if "win_text" in globals():
+        destroy(win_text)
 
-ammo_packets_count_ui = Text(
-    text=f"{player.ammo_packets_count} MAGAZINES" if player.ammo_packets_count > 0 else "[OUT OF MAGAZINES]",
-    color=color.orange if player.ammo_packets_count > 0 else color.red,
-    origin=(-0.5, 0.5),
-    position=(-0.5, 0.475),
-    enabled=False
-)
+    if "title_text" in globals():
+        destroy(title_text)
+        
+    if "start_game_text" in globals():
+        destroy(start_game_text)
+        
+    if "void" in globals():
+        destroy(void)
+        
+    if "ground" in globals():
+        destroy(ground)
 
+    tutorial = Text(
+        text="",
+        color=color.yellow,
+        origin=(-0.5, -0.5),
+        position=(-0.5, -0.475),
+    )
+
+    shotgun_ammo_ui = Text(
+        text="AMMO: 0/0",
+        color=color.orange if player.shotgun_ammo_count > 0 else color.red,
+        origin=(-0.5, 0.5),
+        position=(-0.5, 0.45),
+        enabled=False
+    )
+
+    ammo_packets_count_ui = Text(
+        text=f"{player.ammo_packets_count} MAGAZINES" if player.ammo_packets_count > 0 else "[OUT OF MAGAZINES]",
+        color=color.orange if player.ammo_packets_count > 0 else color.red,
+        origin=(-0.5, 0.5),
+        position=(-0.5, 0.475),
+        enabled=False
+    )
+
+    shotgun_pump = Entity(
+        parent=player,
+        model='quad',
+        texture="textures/shotgun_pump.png",
+        scale=(1.125, 0.125),
+        position=(0, 1.512, 0),
+        rotation=(90, 0, 0),
+        unlit=True,
+        enabled=False
+    )
+
+    crosshair = Entity(
+        parent=camera.ui,
+        model='quad',
+        texture="textures/crosshair.png",
+        color=color.rgba32(255, 60, 60, 220),
+        scale=(0.05, 0.05),
+        z=-1,
+        enabled=False
+    )
+
+    crosshair_ring = Entity(
+        parent=camera.ui,
+        model='quad',
+        texture="textures/crosshair_ring.png",
+        color=color.rgba32(255, 60, 60, 80),
+        scale=(0.05, 0.05),
+        z=-2,
+        enabled=False
+    )
+
+    pump_bar_bg = Entity(
+        parent=camera.ui,
+        model='quad',
+        color=color.rgba32(0, 0, 0, 130),
+        scale=(0.5, 0.022),
+        position=(0, -0.45),
+        z=-1,
+        enabled=False
+    )
+
+    # Pump progress bar fill
+    pump_bar_fill = Entity(
+        parent=camera.ui,
+        model='quad',
+        color=color.rgba32(255, 200, 50, 220),
+        scale=(0.0, 0.018),
+        position=(0.0, -0.45),
+        z=-2,
+        enabled=False
+    )
+
+    screen_shift = Entity(
+        parent=camera.ui,
+        model='quad',
+        scale=2,
+        color=color.rgba(1, 0, 0, 0),
+        z=10
+    )
+
+    win_text = Text(
+        parent=camera.ui,
+        text="",
+        color=color.rgba(0.5, 0, 0, 0),
+        position=(-0.2,0),
+        scale=1
+    )
+
+    ground = Entity(
+        model='cube',
+        scale=(width, 0, height),
+        shader=triplanar_shader,
+        position=(center_x, center_y),
+        texture=generate_noise_texture("world"),
+        color=color.rgba(0.5,0.5,0.5,0),
+        unlit=True
+    )
+
+
+    void = Entity(
+        model='plane',
+        texture=generate_noise_texture("void", max_value=25),
+        scale=200,
+        y=-0.1,
+        texture_scale=(5, 5),
+        color=color.rgb(1, 1, 1, 0),
+        unlit=True
+    )
+
+    void_fade_in = void.fade_in(1, duration=3, curve=curve.linear)
+
+    ground.set_shader_input(
+        "position", Vec2(0)
+    )
+
+    ground.set_shader_input(
+        "texture_scale", Vec2(0.05)
+    )
+
+    title_text = Text(
+        text=title.upper(),
+        origin=(0, -0.35),
+        position=(0, 0.35),
+        scale=5,
+        color=color.red
+    )
+
+    start_game_text = Text(
+        text="press space to start",
+        origin=(0, -0.45),
+        position=(0, -0.45),
+        color=color.rgba(1,1,1,0)
+    )
+    
+    
+    reload_image = Entity(
+        parent=camera.ui,
+        model='quad',
+        texture='textures/reloading/get_bullet.png',
+        scale=(87/100, 13/100),
+        position=(0, 0),
+        color=color.white,
+        enabled=False
+    )
+
+    shotgun = Entity(
+        parent=player,
+        model='quad',
+        texture="textures/shotgun.png",
+        scale=(1.125, 0.125),
+        position=(0, 1.512, 0),
+        rotation=(90, 0, 0),
+        unlit=True,
+        enabled=False
+    )
+
+init_entities()
 window.on_window_resize = reposition
 reposition()
-
-shotgun_pump = Entity(
-    parent=player,
-    model='quad',
-    texture="textures/shotgun_pump.png",
-    scale=(1.125, 0.125),
-    position=(0, 1.512, 0),
-    rotation=(90, 0, 0),
-    unlit=True,
-    enabled=False
-)
-
-crosshair = Entity(
-    parent=camera.ui,
-    model='quad',
-    texture="textures/crosshair.png",
-    color=color.rgba32(255, 60, 60, 220),
-    scale=(0.05, 0.05),
-    z=-1,
-    enabled=False
-)
-
-crosshair_ring = Entity(
-    parent=camera.ui,
-    model='quad',
-    texture="textures/crosshair_ring.png",
-    color=color.rgba32(255, 60, 60, 80),
-    scale=(0.05, 0.05),
-    z=-2,
-    enabled=False
-)
-
-update_crosshair = False
-
-pump_bar_bg = Entity(
-    parent=camera.ui,
-    model='quad',
-    color=color.rgba32(0, 0, 0, 130),
-    scale=(0.5, 0.022),
-    position=(0, -0.45),
-    z=-1,
-    enabled=False
-)
-
-# Pump progress bar fill
-pump_bar_fill = Entity(
-    parent=camera.ui,
-    model='quad',
-    color=color.rgba32(255, 200, 50, 220),
-    scale=(0.0, 0.018),
-    position=(0.0, -0.45),
-    z=-2,
-    enabled=False
-)
-
-screen_shift_strength = 0
-screen_fade_animation = 0
-screen_shift = Entity(
-    parent=camera.ui,
-    model='quad',
-    scale=2,
-    color=color.rgba(1, 0, 0, 0),
-    z=10
-)
-
-win_text = Text(
-    parent=camera.ui,
-    text="",
-    color=color.rgba(0.5, 0, 0, 0),
-    position=(-0.2,0),
-    scale=1
-)
-
-ground = Entity(
-    model='cube',
-    scale=(width, 0, height),
-    shader=triplanar_shader,
-    position=(center_x, center_y),
-    texture=generate_noise_texture("world"),
-    color=color.rgba(0.5,0.5,0.5,0),
-    unlit=True
-)
-
-
-void = Entity(
-    model='plane',
-    texture=generate_noise_texture("void", max_value=25),
-    scale=200,
-    y=-0.1,
-    texture_scale=(5, 5),
-    color=color.rgb(1, 1, 1, 0),
-    unlit=True
-)
-
-void_fade_in = void.fade_in(1, duration=3, curve=curve.linear)
-
-void_noise_timer = 0
-
-ground.set_shader_input(
-    "position", Vec2(0)
-)
-
-ground.set_shader_input(
-    "texture_scale", Vec2(0.05)
-)
-
-title_text = Text(
-    text=title.upper(),
-    origin=(0, -0.35),
-    position=(0, 0.35),
-    scale=5,
-    color=color.red
-)
-
-start_game_text = Text(
-    text="press space to start",
-    origin=(0, -0.45),
-    position=(0, -0.45),
-    color=color.rgba(1,1,1,0)
-)

@@ -43,7 +43,6 @@ class Item(Entity):
             print("    gathering distance:", gather_distance)
         
     def update_item(self, dt):
-        global items
         if self.fade_in_timer < 1:
             self.fade_in_timer += dt
             
@@ -57,11 +56,11 @@ class Item(Entity):
         
         self.texture = generate_noise_texture("item_"+self.item_name+str(dt*100), 10, 10)
         if distance_xz(self.position, player.position - player.direction/2) <= self.gather_distance*self.scale.length():
-            if tutorial.text == "TUTORIAL: TOUCH THE ITEM" and not tutorial_ended:
+            if tutorial.text == "TUTORIAL: TOUCH THE ITEM" and not gameState.tutorial_ended:
                 ShowDialog("it seems there are items here that pulse fast in random colors, weird.").dialog_callback = dialogCallback4
 
             self.give(distance_xz(self.position, player.position - player.direction), dt)
-            items.remove(self)
+            gameState.items.remove(self)
             destroy(self)
 
     def give(self, distance, dt):
