@@ -182,8 +182,8 @@ def dialogCallback3():
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"
-    gameState.items.append(AmmoBoxItem((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-    gameState.items.append(AmmoBoxItem((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
+    gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
 
 def dialogCallback2():
     crosshair.enabled=True
@@ -234,7 +234,7 @@ def restart_game():
     main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 
 def update_game(dt: float):
-    if gameState.tutorial_ended:
+    if gameState.tutorial_ended and tutorial.enabled:
         tutorial.disable()
 
     if gameState.screen_fade_animation > 0:
@@ -317,8 +317,8 @@ def update_game(dt: float):
 def start_game(skip_tutorial: bool = False):
     Audio("audio/ambient.wav", loop=True)
     if skip_tutorial:
-        gameState.items.append(AmmoBoxItem((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-        gameState.items.append(AmmoBoxItem((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
+        gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
         gameState.enemies.append(StaticonEnemy((15, 0.3, 15)))
         gameState.tutorial_ended = True
         main_menu_music.stop()

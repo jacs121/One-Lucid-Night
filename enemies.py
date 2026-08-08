@@ -160,10 +160,10 @@ class StaticonEnemy(Enemy):
         vol = (20 / player_dist) if player_dist > 0 else 0
 
         if damaged:
-            Audio("audio/spider/death.mp3", volume=vol/2)
+            Audio("audio/staticon/death.mp3", volume=vol/2)
             self.update_texture_offset()
         else:
-            Audio("audio/spider/hit.mp3", volume=vol)
+            Audio("audio/staticon/hit.mp3", volume=vol)
     
     def update_texture_offset(self):
         self.set_shader_input(
