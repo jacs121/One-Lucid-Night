@@ -34,17 +34,20 @@ class Rune(Entity):
 
     def update_rune(self, dt):
         self.rotation_y += dt*10
-        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance and not self.used and held_keys["space"] and player.experience >= self.required_experience:
-            self.used = True
-            player.experience -= self.required_experience
-            self.action(dt)
-            if self.uses > 0:
-                self.uses -= 1
-            if self.uses == 0:
-                if self in gameState.runes:
-                    gameState.runes.remove(self)
-                destroy(self)
-                return False
+        if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance and not self.used and held_keys["space"]:
+            if player.experience >= self.required_experience:
+                self.used = True
+                player.experience -= self.required_experience
+                self.action(dt)
+                if self.uses > 0:
+                    self.uses -= 1
+                if self.uses == 0:
+                    if self in gameState.runes:
+                        gameState.runes.remove(self)
+                    destroy(self)
+                    return False
+            else:
+                ShowDialog("*you need {0} more PROFICIENCY to activate this rune*".format(self.required_experience - player.experience))
 
         if distance_xz(self.position, player.position - player.direction/2) <= self.activation_distance*2:
             self.label.enable()

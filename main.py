@@ -37,12 +37,15 @@ def input(key):
             player.reloading = True
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
+            experience_amount_ui.text = f"{player.experience} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY"
             shotgun_ammo_ui.enable()
+            experience_amount_ui.enable()
             ammo_packets_count_ui.enable()
             ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
+            shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
+            experience_amount_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
             if player.ammo_packets_count > 0:
                 tutorial.text = "TUTORIAL: PRESS LEFT ARROW TO GET A BULLET"
-                shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
                 ammo_packets_count_ui.text = f"{player.ammo_packets_count} AMMO PACKETS"
                 player.reload_step = 1
                 reload_image.texture = '/textures/reloading/get_bullet.png'
@@ -55,6 +58,7 @@ def input(key):
             reload_image.enable()
             shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
             shotgun_ammo_ui.enable()
+            experience_amount_ui.enable()
             ammo_packets_count_ui.enable()
             shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
             ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
@@ -104,6 +108,7 @@ def input(key):
         player.reload_step = 0
         reload_image.disable()
         ammo_packets_count_ui.disable()
+        experience_amount_ui.disable()
         if len(gameState.enemies) <= 0:
             if player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT:
                 tutorial.text = "TUTORIAL: TOUCH THE ITEM"

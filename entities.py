@@ -378,14 +378,17 @@ def init_entities():
     global crosshair_ring, pump_bar_bg, pump_bar_fill
     global screen_shift, win_text, void_fade_in
     global title_text, start_game_text, void
-    global ground, reload_image
+    global ground, reload_image, experience_amount_ui
 
+    if "experience_amount_ui" in globals():
+        destroy(experience_amount_ui)
+    
     if "tutorial" in globals():
         destroy(tutorial)
     
     if "reload_image" in globals():
         destroy(reload_image)
-        
+    
     if "shotgun" in globals():
         destroy(shotgun)
         
@@ -448,6 +451,14 @@ def init_entities():
         color=color.orange if player.ammo_packets_count > 0 else color.red,
         origin=(-0.5, 0.5),
         position=(-0.5, 0.475),
+        enabled=False
+    )
+    
+    experience_amount_ui = Text(
+        text=f"{player.experience} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY",
+        color=color.orange if player.experience > 0 else color.red,
+        origin=(-0.5, 0.5),
+        position=(-0.5, 0.425),
         enabled=False
     )
 
