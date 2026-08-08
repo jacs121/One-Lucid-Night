@@ -64,21 +64,21 @@ class WhisperRune(Rune):
         ShowDialog("*there are {0} whispers still alive*".format(len(gameState.enemies)))
 
 class BloodRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 5):
+    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 8):
         super().__init__("Blood Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         ShowDialog("*you have {0} milliliters of blood left*".format(4500*player.health/player.max_health))
 
 class SharpenRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
+    def __init__(self, position = (0, 1, 0), uses = 2, required_experience: float = 10):
         super().__init__("Sharpen Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         player.attack_damage += player.attack_damage/5
 
 class PelletRune(Rune):
-    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
+    def __init__(self, position = (0, 1, 0), uses = 1, required_experience: float = 15):
         super().__init__("Pellet Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
