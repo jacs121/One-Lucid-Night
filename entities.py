@@ -34,6 +34,7 @@ class Player(Entity):
         self.last_mouse_y = mouse.y
         self.direction = Vec3(0)
         self.experience = 0
+        self.shotgun_pellet_count = 2
 
         self.shotgun_ammo_count = 0
         self.ammo_packets_count = 0
@@ -170,7 +171,7 @@ class Player(Entity):
         bullets_hit: dict[Entity, float] = {}
         player_angle = - math.radians(self.rotation_y)
         player_dir = Vec3(math.cos(player_angle), 0, math.sin(player_angle))
-        for _ in range(SHOTGUN_PELLET_COUNT):
+        for _ in range(self.shotgun_pellet_count):
             spread = random.uniform(-SHOTGUN_SPREAD, SHOTGUN_SPREAD)/(1 + 0.5*(self.move_input.length() == 0 and not held_keys["left shift"]))
             bullets_angle = - math.radians(self.rotation_y+spread)
 
@@ -206,7 +207,7 @@ class Player(Entity):
                         else:
                             rangeMultiplier = max(0.0, 1.0 - ((t - 1.5) / 23.5))
 
-                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage/SHOTGUN_PELLET_COUNT * rangeMultiplier * random.uniform(0.95, 1.05))
+                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage/self.shotgun_pellet_count * rangeMultiplier * random.uniform(0.95, 1.05))
                         hit = True
                         ray = Entity(
                             model='quad',

@@ -109,15 +109,23 @@ def input(key):
                 tutorial.text = "TUTORIAL: TOUCH THE ITEM"
                 player.can_move = True
             else:
-                gameState.enemies.append(Staticon((15, 0.3, 15)))
+                gameState.enemies.append(StaticonEnemy((15, 0.3, 15)))
                 tutorial.text = "TUTORIAL: KILL A STATICON"
 
 def power_lerp(x, a=1):
     return 1-math.log(math.cosh((1-2*x)/a))+math.log(math.cosh(1/a))-1
 
-available_items = [ammoBox, medicine, fullMedicineKit]
-available_runes = [HarmRune, WhisperRune, sharpenRune]
-available_enemies = [Staticon, Obeliskus, Maime]
+available_items = {}
+available_runes = {}
+available_enemies = {}
+
+for (item, rune, enemy) in zip_longest(Item.__subclasses__(), Rune.__subclasses__(), Enemy.__subclasses__()):
+    if item:
+        available_items.update({item.__name__[:-4]: item})
+    if rune:
+        available_runes.update({rune.__name__[:-4]: rune})
+    if enemy:
+        available_enemies.update({enemy.__name__[:-5]: enemy})
 
 wave_filepath = "./waves.json"
 
@@ -160,7 +168,7 @@ def load_waves(filepath: str):
                 kwargs = {"enemy": available_enemies[elementIndex], "position": position}
                 kwargs.update(element)
                 
-                if kwargs["enemy"] == Maime:
+                if kwargs["enemy"] == MaimeEnemy:
                     kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
                 waves[-1]["enemies"].append(kwargs)
@@ -174,8 +182,8 @@ def dialogCallback3():
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"
-    gameState.items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-    gameState.items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    gameState.items.append(AmmoBoxItem((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+    gameState.items.append(AmmoBoxItem((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
 
 def dialogCallback2():
     crosshair.enabled=True
@@ -306,9 +314,9 @@ def update_game(dt: float):
 def start_game(skip_tutorial: bool = False):
     Audio("audio/ambient.wav", loop=True)
     if skip_tutorial:
-        gameState.items.append(ammoBox((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-        gameState.items.append(ammoBox((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
-        gameState.enemies.append(Staticon((15, 0.3, 15)))
+        gameState.items.append(AmmoBoxItem((random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        gameState.items.append(AmmoBoxItem((-random.uniform(1, 3), 0.3, random.uniform(0, 5))))
+        gameState.enemies.append(StaticonEnemy((15, 0.3, 15)))
         gameState.tutorial_ended = True
         main_menu_music.stop()
         ground.color = color.rgb(*ground.color.rgb, 1)

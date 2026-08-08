@@ -139,7 +139,6 @@ camera.rotation = (90, 0, 0)
 camera.orthographic = True
 camera.fov = 16
 
-SHOTGUN_PELLET_COUNT = 7
 SHOTGUN_MAX_AMMO_COUNT = 8
 SHOTGUN_SPREAD = 12
 SHOTGUN_RANGE = 18

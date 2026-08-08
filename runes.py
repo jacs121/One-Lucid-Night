@@ -5,8 +5,9 @@ class Rune(Entity):
     def __init__(self, rune_name: str, position: tuple[int, int, int] = (0,1,0), size: int = 0.5, activation_distance: int = 1, required_experience: float = 0, uses: int = -1):
         super().__init__(
             model="cube",
-            scale=(size, 1, size),
-            position=position
+            scale=(size, 0, size),
+            position=position,
+            unlit=True,
         )
 
         self.uses = uses
@@ -20,13 +21,11 @@ class Rune(Entity):
             parent=self,
             rotation=(0,0,0),
             origin=(0, 0),
-            z=5,
-            billboard=True,
-            world_scale=(9.5,0.01875),
-            enabled=False
+            y=1,
+            billboard=True
         )
+        self.label.world_scale *= 10
 
-        self.label.scale *= 5
         self.size = size
         if self.enabled:
             self.scale = Vec3(0)
@@ -70,6 +69,13 @@ class sharpenRune(Rune):
     def action(self, dt):
         player.attack_damage += player.attack_damage/5
 
+class PelletRune(Rune):
+    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
+        super().__init__("Pellet Rune", position, uses=uses, required_experience=required_experience)
+
+    def action(self, dt):
+        player.shotgun_pellet_count += 1
+
 class HarmRune(Rune):
     def __init__(self, position = (0, 1, 0), uses = 2, required_experience: float = 6):
         super().__init__("Harm Rune", position, uses=uses, required_experience=required_experience)
@@ -94,6 +100,7 @@ class AdvancingRune(Rune):
                 gameState.items.append(itemData.pop("item")(**itemData))
 
             for enemyData in gameState.waves[gameState.wave_num-1]["enemies"]:
+                print(enemyData)
                 if "item" in enemyData.keys():
                     enemyData["item"] = enemyData["item"].pop("entity")(**enemyData["item"])
                 gameState.enemies.append(enemyData.pop("enemy")(**enemyData))

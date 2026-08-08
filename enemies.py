@@ -2,6 +2,21 @@ from util import *
 from items import Item
 from entities import player
 
+# Fallback animation controller for models without character/anim bundles
+class AnimStub:
+    def __init__(self):
+        self._playing = False
+    def setPlayRate(self, r):
+        pass
+    def play(self):
+        self._playing = True
+    def stop(self):
+        self._playing = False
+    def is_playing(self):
+        return getattr(self, "_playing", False)
+    def get_frame(self):
+        return 0
+
 class Enemy(Entity):
     def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 20, color: color.Color = color.white, enabled: bool = True):
         super().__init__(
@@ -19,11 +34,11 @@ class Enemy(Entity):
             "position",
             Vec2(0)
         )
-        
+
         self.health = self.max_health = max_health
         self.damage_flash = 0
         self.death_flash = 0
-        
+
         if not hasattr(self, "texture_scale"):
             self.texture_scale = Vec2(scale) if isinstance(scale, (float, int)) else Vec2(scale.x, scale.z)
         
@@ -32,23 +47,31 @@ class Enemy(Entity):
             self.texture_scale
         )
         
-        char = self.model.find("**/+Character").node()
-        part_bundle = char.getBundle(0)
-
         self.anim_controls = {}
+        char_match = self.model.find("**/+Character")
+        if not char_match.isEmpty():
+            try:
+                char = char_match.node()
+                part_bundle = char.getBundle(0)
 
-        for node in self.model.findAllMatches("**/+AnimBundleNode"):
-            bundle = node.node().getBundle()
+                for node in self.model.findAllMatches("**/+AnimBundleNode"):
+                    bundle = node.node().getBundle()
 
-            control = part_bundle.bindAnim(
-                bundle,
-                part_bundle.HMF_ok_anim_extra |
-                part_bundle.HMF_ok_part_extra |
-                part_bundle.HMF_ok_wrong_root_name,
-                PartSubset(),
-            )
+                    control = part_bundle.bindAnim(
+                        bundle,
+                        part_bundle.HMF_ok_anim_extra |
+                        part_bundle.HMF_ok_part_extra |
+                        part_bundle.HMF_ok_wrong_root_name,
+                        PartSubset(),
+                    )
 
-            self.anim_controls[bundle.getName()] = control
+                    self.anim_controls[bundle.getName()] = control
+            except Exception:
+                print("warning: failed to bind animations; using stub controls")
+                self.anim_controls = {"idle": AnimStub("idle")}
+        else:
+            print("warning: model has no Character node; using stub controls")
+            self.anim_controls = {"idle": AnimStub("idle")}
 
     def update_entity(self, dt):
         pass
@@ -79,7 +102,7 @@ class Enemy(Entity):
         self.position.x = clamp(self.position.x, BOUNDARY_REGION[0]+self.scale.x, BOUNDARY_REGION[2]-self.scale.x)
         self.position.z = clamp(self.position.z, BOUNDARY_REGION[1]+self.scale.z, BOUNDARY_REGION[3]-self.scale.z)
 
-class Staticon(Enemy):
+class StaticonEnemy(Enemy):
     def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True):
         super().__init__(
             model="models/staticon.glb",
@@ -220,7 +243,7 @@ class Staticon(Enemy):
         if self.health != 0:
             self.update_texture_offset()
 
-class Obeliskus(Enemy):
+class ObeliskusEnemy(Enemy):
     def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True):
         super().__init__(
             model="models/obeliskus.glb",
@@ -249,6 +272,8 @@ class Obeliskus(Enemy):
             print("        ATTACK_RANGE:", self.attack_range)
             print("        AWARENESS_RANGE:", self.awareness_range)
             print("    game ai:", self.ai_active)
+        
+        self.anim_controls["idle"].play()
 
     def update_entity(self, dt):
         # Entity death visuals
@@ -288,15 +313,15 @@ class Obeliskus(Enemy):
                     else:
                         if dist <= self.attack_range*self.scale.length():
                             if self.attacking_timer <= 0:
-                                self.anim_controls["bite"].play()
                                 self.attacking_timer = 2.5
                             else:
                                 self.attacking_timer -= dt
                         else:
+                            # forward vector based on this entity's rotation
                             forward = Vec3(
-                                math.cos(-math.radians(self.rotation_y)),
+                                math.cos(-math.radians(self.rotation_y+90)),
                                 0,
-                                math.sin(-math.radians(self.rotation_y))
+                                math.sin(-math.radians(self.rotation_y+90))
                             )
                             
                             self.position += forward * min(
@@ -308,6 +333,8 @@ class Obeliskus(Enemy):
 
             target_rotation_y = math.degrees(math.atan2(dx, dz))
             angle_diff = ((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180
+            if not self.anim_controls["idle"].is_playing():
+                self.anim_controls["idle"].play()
 
     def update_texture(self):
         self.texture = generate_triangle_texture("obeliskus_"+str(int(self.position.x))+"_"+str(int(self.position.z)))
@@ -316,7 +343,7 @@ class Obeliskus(Enemy):
         if super().damage(damage) != "":
             self.attacked_timer = 6 + self.attacked_timer/3
 
-class Maime(Enemy):
+class MaimeEnemy(Enemy):
     def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(

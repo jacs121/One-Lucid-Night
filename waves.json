@@ -2,64 +2,64 @@
     [
         {
             "type": "enemy",
-            "enemies": [0],
+            "enemies": ["Staticon"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "enemy",
-            "enemies": [0],
+            "enemies": ["Staticon"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "rune",
-            "runes": [2],
+            "runes": ["sharpen"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "item",
-            "items": [0,1],
+            "items": ["AmmoBox", "Medicine"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "item",
-            "items": [0],
+            "items": ["AmmoBox"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         }
     ],
     [
         {
             "type": "enemy",
-            "enemies": [0],
+            "enemies": ["Staticon"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "enemy",
-            "enemies": [1],
+            "enemies": ["Staticon"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "enemy",
-            "enemies": [0],
+            "enemies": ["Staticon"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "enemy",
-            "enemies": [1],
+            "enemies": ["Obeliskus"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "item",
-            "items": [0,1],
+            "items": ["AmmoBox","Medicine"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "item",
-            "items": [0],
+            "items": ["AmmoBox"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "rune",
-            "runes": [0,1],
+            "runes": ["Harm", "Whisper"],
             "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
         }
     ]

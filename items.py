@@ -20,9 +20,9 @@ class Item(Entity):
             rotation=(0,0,0),
             origin=(0, 0),
             z=1,
-            billboard=True,
-            world_scale=(9.5,0.01875)
+            billboard=True
         )
+        self.label.world_scale *= 16
 
         self.item_name = item_name
         self.gather_distance = gather_distance
@@ -69,21 +69,21 @@ class Item(Entity):
 def dialogCallback4():
     tutorial.text = "TUTORIAL: PRESS R TO LOAD SHOTGUN"
 
-class ammoBox(Item):
+class AmmoBoxItem(Item):
     def __init__(self, position = (0, 1.3, 0)):
         super().__init__("ammo box", position, 0.5)
 
     def give(self, distance, dt):
         player.ammo_packets_count += 8
 
-class medicine(Item):
+class MedicineItem(Item):
     def __init__(self, position = (0, 1.3, 0)):
         super().__init__("medicine", position, 0.25)
 
     def give(self, distance, dt):
         player.health = min(player.health + player.max_health/10, player.max_health)
 
-class fullMedicineKit(Item):
+class FullMedicineKitItem(Item):
     def __init__(self, position = (0, 1.3, 0)):
         super().__init__("full medicine kit", position, 0.5)
 
