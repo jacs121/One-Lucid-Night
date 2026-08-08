@@ -22,7 +22,8 @@ class Rune(Entity):
             rotation=(0,0,0),
             origin=(0, 0),
             y=1,
-            billboard=True
+            billboard=True,
+            color=color.gray
         )
         self.label.world_scale *= 10
 
@@ -128,5 +129,5 @@ class AdvancingRune(Rune):
             self.sound.balance = clamp(panning, -2, 2)
 
             distance = distance_xz(self.position, camera.position)
-            self.color = color.hsv(0, 1-1/(distance + 1.5), 1)
+            self.label.color = self.color = color.hsv(0, 1-1/(distance + 1.5), 1)
             self.sound.volume = 1 - clamp(distance / distance_2d(Vec2(BOUNDARY_REGION[0], BOUNDARY_REGION[1]), Vec2(BOUNDARY_REGION[2], BOUNDARY_REGION[3])), 0, 1)

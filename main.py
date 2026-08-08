@@ -220,7 +220,7 @@ def restart_game():
     for rune in gameState.runes:
         rune.sound.stop()
         destroy(rune)
- 
+
     for entity in gameState.enemies+gameState.items:
         destroy(entity)
 
@@ -234,6 +234,9 @@ def restart_game():
     main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 
 def update_game(dt: float):
+    if gameState.tutorial_ended:
+        tutorial.disable()
+
     if gameState.screen_fade_animation > 0:
         gameState.screen_fade_animation -= dt/10
         screen_shift.color = color.rgba(gameState.game_over*(power_lerp(1-gameState.screen_fade_animation) if gameState.screen_fade_animation > 0 else 0), 0, 0, 1 - gameState.screen_fade_animation)
@@ -287,7 +290,7 @@ def update_game(dt: float):
     for rune in gameState.runes:
         rune.update_rune(dt)
 
-    if gameState.alive_enemies == 0 and not gameState.waiting_to_advance:
+    if ((gameState.tutorial_ended) or (not gameState.tutorial_ended and tutorial.text == "TUTORIAL: KILL A STATICON")) and gameState.alive_enemies == 0 and not gameState.waiting_to_advance:
         print("waiting to advance wave to #"+str(gameState.wave_num+1))
         gameState.runes.append(AdvancingRune((random.uniform(left + 10, right - 10), 1, random.uniform(bottom + 10, top - 10))))
         gameState.waiting_to_advance = True
@@ -295,7 +298,7 @@ def update_game(dt: float):
         if not gameState.tutorial_ended:
             tutorial.text = "TUTORIAL: FIND THE RUNE"
 
-    elif gameState.alive_enemies > 0 and gameState.waiting_to_advance:
+    elif (gameState.alive_enemies > 0 and gameState.waiting_to_advance):
         advancing_runes = [r for r in gameState.runes if isinstance(r, AdvancingRune)]
         for rune in advancing_runes:
             try:

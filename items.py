@@ -57,6 +57,7 @@ class Item(Entity):
         self.texture = generate_noise_texture("item_"+self.item_name+str(dt*100), 10, 10)
         if distance_xz(self.position, player.position - player.direction/2) <= self.gather_distance*self.scale.length():
             if tutorial.text == "TUTORIAL: TOUCH THE ITEM" and not gameState.tutorial_ended:
+                player.can_move = False
                 ShowDialog("it seems there are items here that pulse fast in random colors, weird.").dialog_callback = dialogCallback4
 
             self.give(distance_xz(self.position, player.position - player.direction), dt)
@@ -67,6 +68,7 @@ class Item(Entity):
         pass
 
 def dialogCallback4():
+    player.can_move = True
     tutorial.text = "TUTORIAL: PRESS R TO LOAD SHOTGUN"
 
 class AmmoBoxItem(Item):

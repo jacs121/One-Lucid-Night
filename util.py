@@ -1,7 +1,7 @@
 from imports import *
 
 title = "One Lucid Night"
-app = Ursina(title)
+app = Ursina(title, fullscreen=True)
 
 def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')

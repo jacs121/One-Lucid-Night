@@ -85,7 +85,7 @@ class Player(Entity):
         
 
         if not gameState.tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
-            if distance_2d(gameState.runes[0].position.xz, self.position.xz - self.direction.xz/2) <= gameState.runes[0].activation_distance:
+            if len(gameState.runes) and distance_2d(gameState.runes[0].position.xz, self.position.xz - self.direction.xz/2) <= gameState.runes[0].activation_distance:
                 tutorial.text = "TUTORIAL: INTERACT WITH A RUNE BY PRESSING SPACE"
 
         if not self.reloading:
