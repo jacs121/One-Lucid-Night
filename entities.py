@@ -10,9 +10,9 @@ class Player(Entity):
             shader=triplanar_shader,
             enabled=False
         )
-    
+
         self.speed = speed
-        self.attack_damage = 10
+        self.attack_damage = 12.5
         self.max_health = self.health = max_health
         self.view_cone_half_angle = view_cone_range / 2
         self.set_shader_input(
@@ -207,7 +207,7 @@ class Player(Entity):
                         else:
                             rangeMultiplier = max(0.0, 1.0 - ((t - 1.5) / 23.5))
 
-                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage/self.shotgun_pellet_count * rangeMultiplier * random.uniform(0.95, 1.05))
+                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage * rangeMultiplier * random.uniform(0.95, 1.05))
                         hit = True
                         ray = Entity(
                             model='quad',

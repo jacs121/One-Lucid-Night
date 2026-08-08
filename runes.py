@@ -61,9 +61,16 @@ class WhisperRune(Rune):
         super().__init__("Whisper Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
-        ShowDialog("there are {0} whispers still alive".format(len(gameState.enemies)))
+        ShowDialog("*there are {0} whispers still alive*".format(len(gameState.enemies)))
 
-class sharpenRune(Rune):
+class BloodRune(Rune):
+    def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 5):
+        super().__init__("Whisper Rune", position, uses=uses, required_experience=required_experience)
+
+    def action(self, dt):
+        ShowDialog("*you have {0} milliliters of blood left*".format(4500*player.health/player.max_health))
+
+class SharpenRune(Rune):
     def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 10):
         super().__init__("Sharpen Rune", position, uses=uses, required_experience=required_experience)
 

@@ -94,9 +94,11 @@ class Enemy(Entity):
         player.health = max(player.health - damage_mul*damage, 0)
         if player.health > 0:
             gameState.screen_shift_strength = 0.5
+            Audio("audio/hurt.mp3")
         else:
             gameState.game_over = True
             gameState.screen_fade_timer = 1
+            Audio("audio/hurt.mp3", pitch=0.25)
     
     def update(self):
         self.position.x = clamp(self.position.x, BOUNDARY_REGION[0]+self.scale.x, BOUNDARY_REGION[2]-self.scale.x)
