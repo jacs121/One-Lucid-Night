@@ -65,7 +65,7 @@ class WhisperRune(Rune):
 
 class BloodRune(Rune):
     def __init__(self, position = (0, 1, 0), uses = 3, required_experience: float = 5):
-        super().__init__("Whisper Rune", position, uses=uses, required_experience=required_experience)
+        super().__init__("Blood Rune", position, uses=uses, required_experience=required_experience)
 
     def action(self, dt):
         ShowDialog("*you have {0} milliliters of blood left*".format(4500*player.health/player.max_health))
