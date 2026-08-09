@@ -340,7 +340,7 @@ class ObeliskusEnemy(Enemy):
 
     def damage(self, damage):
         if super().damage(damage) != "":
-            self.attacked_timer = 6 + self.attacked_timer/3
+            self.attacked_timer += 4 - min(self.attacked_timer/4, 3)
 
 class MaimeEnemy(Enemy):
     def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False):
