@@ -3,7 +3,7 @@ from util import *
 class Player(Entity):
     def __init__(self, speed: int = 2.5, view_cone_range: int = 90, max_health: int = 100):
         super().__init__(
-            model="models/player.glb",
+            model=load_model("models/player.glb", use_deepcopy=True),
             rotation=(0,0,0),
             y=0.3,
             unlit=True,
@@ -544,7 +544,7 @@ def init_entities():
     void = Entity(
         model='plane',
         texture=generate_noise_texture("void", max_value=25),
-        scale=200,
+        scale=125,
         y=-0.1,
         texture_scale=(5, 5),
         color=color.rgb(1, 1, 1, 0),

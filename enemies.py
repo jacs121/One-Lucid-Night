@@ -17,16 +17,15 @@ class AnimStub:
         return 0
 
 class Enemy(Entity):
-    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 20, color: color.Color = color.white, enabled: bool = True):
+    def __init__(self, model: str, position: tuple[int, int, int] = (0, 1.3, 0), scale: float | Vec2 | Vec3 = 1, max_health: int = 20, color: color.Color = color.white):
         super().__init__(
-            model=model,
+            model=load_model(model, use_deepcopy=True),
             scale=scale,
             unlit=True,
             rotation=(0,0,0),
             position=position,
             shader=triplanar_shader,
-            color=color,
-            enabled=enabled
+            color=color
         )
 
         self.set_shader_input(
@@ -112,7 +111,7 @@ class StaticonEnemy(Enemy):
             max_health=max_health,
             color=base_color
         )
-        
+
         self.speed=speed
         self.ai_active = ai_active
         self.base_color = base_color
@@ -125,7 +124,7 @@ class StaticonEnemy(Enemy):
                 GROUND_NOISE_SCALE/64,
             )
         )
-        
+
         self.is_moving = False
 
         self.attack_range = attack_range
@@ -165,7 +164,7 @@ class StaticonEnemy(Enemy):
             self.update_texture_offset()
         else:
             Audio("audio/staticon/hit.mp3", volume=vol)
-    
+
     def update_texture_offset(self):
         self.set_shader_input(
             "position",
@@ -221,7 +220,7 @@ class StaticonEnemy(Enemy):
                 if angle > player.view_cone_half_angle or player.reloading or self.awareness_range > dist > self.awareness_range/1.5:
                     target_rotation_y = math.degrees(math.atan2(direction.x, direction.z))
                     self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
-                    
+
                     if dist <= self.attack_range*self.scale.length():
                         if not self.anim_controls["attack"].is_playing():
                             self.anim_controls["attack"].play()
@@ -292,7 +291,7 @@ class ObeliskusEnemy(Enemy):
                 0,
                 lerp(1, 0, 1-1/(self.attacked_timer)),
             )
-    
+
         elif self.health != 0:
             self.attacked_timer = 0
             self.color = color.white
@@ -322,7 +321,7 @@ class ObeliskusEnemy(Enemy):
                                 0,
                                 math.sin(-math.radians(self.rotation_y+90))
                             )
-                            
+
                             self.position += forward * min(
                                 self.speed * dt * self.scale.length() * (self.health/self.max_health) * (1 - 0.5 * int(player.reloading)),
                                 dist
@@ -371,7 +370,7 @@ class MaimeEnemy(Enemy):
             self.label = item.label
 
         destroy(item)
-        
+
         if self.enabled:
             print("a maime has been summoned:")
             print("    item disguised:", self.model)
@@ -387,7 +386,7 @@ class MaimeEnemy(Enemy):
             print("        ATTACK_RANGE:", self.attack_range)
             print("        AWARENESS_RANGE:", self.awareness_range)
             print("    game ai:", self.ai_active)
-    
+
     def update_entity(self, dt):
         if self.fade_in_timer < 1:
             self.fade_in_timer += dt
@@ -401,7 +400,7 @@ class MaimeEnemy(Enemy):
                         self.itemColor = color.Color(color.random_color()*color.gray)
                     else:
                         self.itemColor = color.gray
-                                    
+
                     self.texture = generate_noise_texture("maime_"+str(dt*100), 15, 15)
                     self.timer = 0
 

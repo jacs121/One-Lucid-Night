@@ -172,7 +172,7 @@ def load_waves(filepath: str):
 
                 kwargs = {"enemy": available_enemies[elementIndex], "position": position}
                 kwargs.update(element)
-                
+            
                 if kwargs["enemy"] == MaimeEnemy:
                     kwargs["item"] = {"entity": random.choice(available_items), "position": position}
 
@@ -198,7 +198,7 @@ def dialogCallback2():
     crosshair.fade_in()
     crosshair_ring.color = color.rgba(255, 60, 60, 0)
     crosshair_ring.animate_color(color.rgba32(255, 60, 60, 80), 2, curve=curve.linear)
-    
+
     ShowDialog("I cant wake up too.").dialog_callback = dialogCallback3
 
 def dialogCallback1():
@@ -209,7 +209,7 @@ def dialogCallback1():
     shotgun.color = color.rgba(0,0,0,0)
     shotgun_pump.animate_color(color.white, 0.5, curve=curve.linear)
     shotgun.animate_color(color.white, 0.5, curve=curve.linear)
-    
+
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
 def restart_game():
@@ -219,7 +219,7 @@ def restart_game():
     global crosshair, crosshair_ring, player
     global screen_shift, win_text, void_fade_in
     global start_game_text, ground, main_menu_music
-    
+
     destroy(player)
     player = Player()
     for rune in gameState.runes:
