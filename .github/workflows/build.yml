@@ -56,7 +56,7 @@ jobs:
 
           python -m pip install --no-cache-dir -r requirements.txt
 
-      - name: Install dependencies
+      - name: Install dependencies (macos-14)
         shell: bash
         run: |
           if [ "${{ matrix.os }}" = "macos-14" ]; then

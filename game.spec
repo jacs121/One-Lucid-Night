@@ -10,7 +10,7 @@ else:
 
 datas = [
     ("assets", "assets"),
-    ("waves.json", "."),
+    ("waves.json", "assets"),
 ]
 
 binaries = []
