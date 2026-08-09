@@ -2,7 +2,6 @@ from util import *
 from items import Item
 from entities import player
 
-# Fallback animation controller for models without character/anim bundles
 class AnimStub:
     def __init__(self):
         self._playing = False
@@ -41,12 +40,12 @@ class Enemy(Entity):
 
         if not hasattr(self, "texture_scale"):
             self.texture_scale = Vec2(scale) if isinstance(scale, (float, int)) else Vec2(scale.x, scale.z)
-        
+
         self.set_shader_input(
             "texture_scale",
             self.texture_scale
         )
-        
+
         self.anim_controls = {}
         char_match = self.model.find("**/+Character")
         if not char_match.isEmpty():
@@ -68,14 +67,14 @@ class Enemy(Entity):
                     self.anim_controls[bundle.getName()] = control
             except Exception:
                 print("warning: failed to bind animations; using stub controls")
-                self.anim_controls = {"idle": AnimStub("idle")}
+                self.anim_controls = {"idle": AnimStub()}
         else:
             print("warning: model has no Character node; using stub controls")
-            self.anim_controls = {"idle": AnimStub("idle")}
+            self.anim_controls = {"idle": AnimStub()}
 
     def update_entity(self, dt):
         pass
-    
+
     def damage(self, damage: int):
         if self.health == 0:
             return
@@ -88,7 +87,7 @@ class Enemy(Entity):
         else:
             self.damage_flash = 0.5
         return False
-    
+
     def attack(self, damage: int):
         damage_mul = self.scale.length()*(1-(self.max_health/self.health if self.health > 0 else 0))
         player.health = max(player.health - damage_mul*damage, 0)
@@ -99,7 +98,7 @@ class Enemy(Entity):
             gameState.game_over = True
             gameState.screen_fade_timer = 1
             Audio("audio/hurt.mp3", pitch=0.25)
-    
+
     def update(self):
         self.position.x = clamp(self.position.x, BOUNDARY_REGION[0]+self.scale.x, BOUNDARY_REGION[2]-self.scale.x)
         self.position.z = clamp(self.position.z, BOUNDARY_REGION[1]+self.scale.z, BOUNDARY_REGION[3]-self.scale.z)
@@ -192,7 +191,7 @@ class StaticonEnemy(Enemy):
                 lerp(0.75, self.base_color.s, 1-self.damage_flash),
                 lerp(self.health/self.max_health, self.base_color.v, 1-self.damage_flash),
             )
-            
+
             self.texture = generate_noise_texture("staticon_"+str(random.randint(0,1000000)))
         elif self.health != 0:
             self.damage_flash = 0
@@ -260,7 +259,7 @@ class ObeliskusEnemy(Enemy):
         self.awareness_range = awareness_range
         self.attacked_timer = 0
         self.attacking_timer = 0
-        
+
         if self.enabled:
             print("a obeliskus has been summoned:")
             print("    model:", self.model)
@@ -274,7 +273,7 @@ class ObeliskusEnemy(Enemy):
             print("        ATTACK_RANGE:", self.attack_range)
             print("        AWARENESS_RANGE:", self.awareness_range)
             print("    game ai:", self.ai_active)
-        
+
         self.anim_controls["idle"].play()
 
     def update_entity(self, dt):
@@ -298,7 +297,6 @@ class ObeliskusEnemy(Enemy):
             self.attacked_timer = 0
             self.color = color.white
 
-        # Entity AI
         if self.health != 0 and self.ai_active:
             to_self = Vec3(
                 self.x - player.x,
@@ -319,7 +317,6 @@ class ObeliskusEnemy(Enemy):
                             else:
                                 self.attacking_timer -= dt
                         else:
-                            # forward vector based on this entity's rotation
                             forward = Vec3(
                                 math.cos(-math.radians(self.rotation_y+90)),
                                 0,
@@ -354,7 +351,7 @@ class MaimeEnemy(Enemy):
             scale=item.scale,
             max_health=max_health
         )
-        
+
         self.model = item.model
         self.health = max_health
         self.awareness_range = awareness_range
@@ -394,7 +391,7 @@ class MaimeEnemy(Enemy):
     def update_entity(self, dt):
         if self.fade_in_timer < 1:
             self.fade_in_timer += dt
-            
+
         if self.health != 0 and self.ai_active:
             if not self.exposed:
                 self.color = color.rgba(self.itemColor.r,self.itemColor.b,self.itemColor.g,self.fade_in_timer)
@@ -440,7 +437,7 @@ class MaimeEnemy(Enemy):
 
                         if not self.anim_controls["walk"].is_playing():
                             self.anim_controls["walk"].play()
-                            
+
             if self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 

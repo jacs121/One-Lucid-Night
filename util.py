@@ -13,7 +13,7 @@ def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_v
         / 255
         + min_value
     ).astype(np.uint8)
-    
+
     img = Image.fromarray(
         scaled.reshape(height, width),
         'L'
@@ -24,7 +24,7 @@ def generate_triangle_texture(seed: str, width=512, height=512):
     data = seed.encode('utf-8')
     seed = hashlib.sha512(data).digest().decode()
     random = np.random.RandomState(seed)
-    
+
     num_points = 150
     points = random.rand(num_points, 2) * [width - 24, height - 24]
     corners = np.array([[0, 0], [width, 0], [0, height], [width, height]])
@@ -46,7 +46,7 @@ def generate_triangle_texture(seed: str, width=512, height=512):
             random.randint(0, 255),
         )
         draw.polygon([p1, p2, p3], fill=color)
-    
+
     return Texture(draw)
 
 @dataclass
@@ -54,7 +54,7 @@ class GameState:
     enemies: list
     items: list
     runes: list
-    
+
     wave_num: int
     game_over: bool
     game_won: bool
@@ -65,14 +65,14 @@ class GameState:
     waves: list[dict[str, list]]
     waiting_to_advance: bool
     update_crosshair: bool
-    
+
     screen_fade_animation: float
     screen_shift_strength: float
     screen_fade_timer: float
     void_noise_timer: float
-    
+
     alive_enemies: int
-    
+
     @classmethod
     def default(cls):
         return cls([], [], [], 0, False, False, False, True, [], False, False, 0, 0, 0, 0, 0)

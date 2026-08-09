@@ -72,17 +72,17 @@ class Player(Entity):
             print("    available animation:")
             print("\n        "+"\n        ".join(self.anim_controls.keys()))
             print("    animation:", self.animation)
-    
+
     def update_player(self, dt):
         self.update_shotgun(dt)
-        
+
         rad = -math.radians(self.rotation_y)
         if self.shotgun_ready:
             self.rotation_y = lerp_angle(self.rotation_y, math.degrees(
                 math.atan2(-mouse.y, mouse.x)
             ), dt*10)
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
-        
+
 
         if not gameState.tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
             if len(gameState.runes) and distance_2d(gameState.runes[0].position.xz, self.position.xz - self.direction.xz/2) <= gameState.runes[0].activation_distance:
@@ -125,13 +125,13 @@ class Player(Entity):
                 self.animation = "idle"
                 self.anim_controls["idle"].play()
                 self.prev_frame_num = -1
-            
+
             if self.animation != "idle":
                 if held_keys["left shift"]:
                     self.anim_controls[self.animation].setPlayRate(2)
                 else:
                     self.anim_controls[self.animation].setPlayRate(1)
-            
+
         if self.camera_shake > 0:
             self.camera_shake -= dt * 3
             shake = max(0, self.camera_shake) * 0.15
@@ -142,7 +142,7 @@ class Player(Entity):
             )
         else:
             camera.position = (self.x, camera.y, self.z)
-    
+
         self.position = Vec3(clamp(self.position.x,
                                     max(BOUNDARY_REGION[0]+self.direction.x, BOUNDARY_REGION[0]),
                                     min(BOUNDARY_REGION[2]+self.direction.x, BOUNDARY_REGION[2])),
@@ -156,7 +156,7 @@ class Player(Entity):
         """Fire the shotgun. Each bullets is ray-cast and checked against the entity."""
         if not self.shotgun_ready:
             return
-        
+
         self.shotgun_ready = False
         self.shotgun_pumping = True
         self.pump_progress = 0
@@ -167,7 +167,7 @@ class Player(Entity):
         self.pump_strokes = 0
         self.shotgun_ammo_count -= 1
         Audio("audio/shotgun/clink.mp3")
-        
+
         bullets_hit: dict[Entity, float] = {}
         player_angle = - math.radians(self.rotation_y)
         player_dir = Vec3(math.cos(player_angle), 0, math.sin(player_angle))
@@ -182,13 +182,13 @@ class Player(Entity):
             for entity in gameState.enemies:
                 dx = entity.x - self.x
                 dz = entity.z - self.z
-                
+
                 t = dx * dir_x + dz * dir_z-1
-                
+
                 if 0 < t < SHOTGUN_RANGE:
                     closest_x = self.x + t * dir_x
                     closest_z = self.z + t * dir_z
-                    
+
                     ox = closest_x - entity.x
                     oz = closest_z - entity.z
 
@@ -289,7 +289,7 @@ class Player(Entity):
         recoil_offset = -aim_dir * self.shotgun_recoil * 0.12
 
         pump_offset = -aim_dir * (1 - abs(2*self.pump_progress - 1)) * 0.25
-        
+
         shotgun.position = (
             recoil_offset.x,
             shotgun.y,
@@ -305,9 +305,9 @@ class Player(Entity):
             if gameState.update_crosshair == True:
                 crosshair.color = color.rgb32(255, 0, 0)
             crosshair_ring.color = color.rgb32(255, 0, 0)
-            
+
             crosshair.position = (mouse.x, mouse.y, -2)
-            
+
             fill = self.pump_progress
             pump_bar_fill.scale_x = (fill - 0.01) / 2
             pump_bar_fill.x = 0
@@ -316,10 +316,10 @@ class Player(Entity):
             if gameState.update_crosshair == True:
                 crosshair.color = color.rgb32(200, 200, 200)
                 crosshair_ring.color = color.rgb32(200, 200, 200)
-            
+
             crosshair.position = (mouse.x, mouse.y, -1)
             crosshair_ring.position = (mouse.x, mouse.y, -2)
-            
+
             pump_bar_fill.scale_x = 0.49
             pump_bar_fill.x = 0
             pump_bar_fill.color = color.rgba32(80, 220, 80, 220)
@@ -345,7 +345,7 @@ class ShowDialog(Entity):
             origin=(0, -0.5),
             position=(0, -0.475)
         )
-        
+
         self.dialog_text = text
         self.dialog_speed = dialog_speed
         self.dialog_timer = 0
@@ -359,7 +359,7 @@ class ShowDialog(Entity):
                 self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
         else:
             self.dialog_callback()
-            
+
             destroy(self.label)
             destroy(self)
 
@@ -368,7 +368,7 @@ class ShowDialog(Entity):
             self.dialog_timer = len(self.dialog_text) + 1/self.dialog_speed
         elif key == "enter" and self.dialog_timer >= len(self.dialog_text):
             self.dialog_timer = len(self.dialog_text) + 2/self.dialog_speed
-    
+
     def dialog_callback(self):
         pass
 
@@ -382,52 +382,52 @@ def init_entities():
 
     if "experience_amount_ui" in globals():
         destroy(experience_amount_ui)
-    
+
     if "tutorial" in globals():
         destroy(tutorial)
-    
+
     if "reload_image" in globals():
         destroy(reload_image)
-    
+
     if "shotgun" in globals():
         destroy(shotgun)
-        
+
     if "shotgun_ammo_ui" in globals():
         destroy(shotgun_ammo_ui)
-        
+
     if "shotgun_pump" in globals():
         destroy(shotgun_pump)
-        
+
     if "ammo_packets_count_ui" in globals():
         destroy(ammo_packets_count_ui)
-        
+
     if "crosshair" in globals():
         destroy(crosshair)
-        
+
     if "crosshair_ring" in globals():
         destroy(crosshair_ring)
-        
+
     if "pump_bar_bg" in globals():
         destroy(pump_bar_bg)
-        
+
     if "pump_bar_fill" in globals():
         destroy(pump_bar_fill)
-        
+
     if "screen_shift" in globals():
         destroy(screen_shift)
-        
+
     if "win_text" in globals():
         destroy(win_text)
 
     if "title_text" in globals():
         destroy(title_text)
-        
+
     if "start_game_text" in globals():
         destroy(start_game_text)
-        
+
     if "void" in globals():
         destroy(void)
-        
+
     if "ground" in globals():
         destroy(ground)
 
@@ -453,7 +453,7 @@ def init_entities():
         position=(-0.5, 0.475),
         enabled=False
     )
-    
+
     experience_amount_ui = Text(
         text=f"{player.experience} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY",
         color=color.orange if player.experience > 0 else color.red,
@@ -575,8 +575,7 @@ def init_entities():
         position=(0, -0.45),
         color=color.rgba(1,1,1,0)
     )
-    
-    
+
     reload_image = Entity(
         parent=camera.ui,
         model='quad',

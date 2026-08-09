@@ -13,7 +13,7 @@ class Item(Entity):
             texture=generate_noise_texture("item_"+item_name, 15, 15),
             enabled=enabled
         )
-        
+
         self.label = Text(
             text=item_name.upper(),
             parent=self,
@@ -32,7 +32,7 @@ class Item(Entity):
             "position",
             Vec2(0)
         )
-        
+
         self.set_shader_input(
             "texture_scale",
             Vec2(1/self.scale.x, 1/self.scale.y)
@@ -41,11 +41,11 @@ class Item(Entity):
             print(f"added items to the map:")
             print("    item name:", item_name.upper())
             print("    gathering distance:", gather_distance)
-        
+
     def update_item(self, dt):
         if self.fade_in_timer < 1:
             self.fade_in_timer += dt
-            
+
         if random.random() > 0.5:
             itemColor = color.Color(color.random_color()*color.gray)
         else:
@@ -53,7 +53,7 @@ class Item(Entity):
 
         self.color = color.rgba(itemColor.r,itemColor.b,itemColor.g,self.fade_in_timer)
         self.label.color = color.rgba(1,1,1,self.fade_in_timer)
-        
+
         self.texture = generate_noise_texture("item_"+self.item_name+str(dt*100), 10, 10)
         if distance_xz(self.position, player.position - player.direction/2) <= self.gather_distance*self.scale.length():
             if tutorial.text == "TUTORIAL: TOUCH THE ITEM" and not gameState.tutorial_ended:
