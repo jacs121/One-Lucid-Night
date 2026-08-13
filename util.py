@@ -158,7 +158,7 @@ def generate_sun_with_eye(eye_seed: int, sun_seed: int, resolution: int = 256, e
     )
 
     texture.paste(eye, (int(resolution/2-eye.width/2), int(resolution/2-eye.height/2), int(resolution/2+eye.width/2), int(resolution/2+eye.height/2)), eye)
-    return texture
+    return Texture(texture)
 
 class SceneTypes(StrEnum):
     MAIN_MENU = auto()
