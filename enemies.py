@@ -183,6 +183,7 @@ class StaticonEnemy(Enemy):
                 self.death_flash,
                 self.death_flash
             )
+
         elif self.health != 0 and self.damage_flash > 0:
             self.damage_flash -= dt
             self.color = color.hsv(
@@ -342,7 +343,7 @@ class ObeliskusEnemy(Enemy):
             self.attacked_timer += 4 - min(self.attacked_timer/4, 3)
 
 class MaimeEnemy(Enemy):
-    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 100, ai_active: bool = True, exposed: bool = False):
+    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 15, ai_active: bool = True, exposed: bool = False):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(
             model="models/maime.glb",
@@ -445,3 +446,88 @@ class MaimeEnemy(Enemy):
 
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
+
+class Diatrum(Enemy):
+    def __init__(self, position: tuple[float, float, float] = (0, 1.3, 0), max_health = 10, awareness_range: int = 10, ai_active: bool = True):
+        super().__init__(
+            model="square",
+            position=position,
+            scale=2,
+            max_health=max_health,
+            color=color.white
+        )
+        
+        self.texture_seeds = (random.random(), random.random())
+        self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
+        
+
+        self.awareness_range = awareness_range
+        self.ai_active = ai_active
+        self.burn_timer = 0
+        self.blinding_timer = 0
+        self.origin_position = position
+        self.animation_timer = 0
+
+        self.blinding_light = Entity(
+            model='plane',
+            scale=125,
+            y=0.25,
+            texture_scale=(5, 5),
+            color=color.rgb(1, 1, 1, 0),
+            unlit=True
+        )
+
+    def update_entity(self, dt):
+        if self.health != 0 and self.ai_active:
+            to_self = Vec3(
+                self.x - player.x,
+                0,
+                self.z - player.z
+            )
+
+            self.is_moving = False
+            dist = max(to_self.length() - self.scale.length() / 2, 0)
+            if self.awareness_range >= dist:
+                self.animation_timer += dt
+                if self.animation_timer > 5:
+                    self.texture_seeds = (self.texture_seeds[0], random.random())
+                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
+
+                if 0 < int(self.blinding_timer*5) % 1 < 0.1:
+                    self.texture_seeds = (random.random(), self.texture_seeds[0])
+                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1], eye_open_ratio=self.blinding_timer/2 + 0.5)
+
+                self.burn_timer += dt
+                if self.burn_timer > 4:
+                    self.burn_timer = 0
+                direction = to_self.normalized()
+                forward = Vec3(
+                    math.cos(-math.radians(player.rotation_y)),
+                    0,
+                    math.sin(-math.radians(player.rotation_y))
+                )
+
+                angle = math.degrees(
+                    math.acos(
+                        clamp(forward.dot(direction), -1, 1)
+                    )
+                )
+
+                if angle >= player.view_cone_half_angle:
+                    self.blinding_timer += dt / 5
+                else:
+                    self.blinding_timer -= dt / 5
+                self.blinding_timer = clamp(self.blinding_timer, 0, 1)
+                if self.blinding_light.color.a != self.blinding_timer:
+                    self.blinding_light.color = color.rgba(*self.blinding_light.color.rgb, self.blinding_timer)
+
+                if self.blinding_light.color.a != 0:
+                    self.position = (
+                        self.origin_position[0] + random.uniform(-self.blinding_light * 2, self.blinding_light * 2),
+                        self.y,
+                        self.origin_position[2] + random.uniform(-self.blinding_light * 2, self.blinding_light * 2)
+                    )
+
+                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
+                else:
+                    self.position = Vec3(*self.origin_position)

@@ -33,7 +33,7 @@ Fight waves of oddly creepy enemies; survive until the last wave (which is not y
 
 # None implemented features
 
-* Add the Diatum Enemy: `slows you down and hurts you if you look at it`
+* Add the Diatrum Enemy: `blinds you with light and hurts a bit over timeif you look at it`
 * Add the Feeterlug enemy: `walking on it makes you unable to move or shoot any other enemies except it; you need to kill it, and you cannot`
 * Create the default wave progression
 * Add a final boss

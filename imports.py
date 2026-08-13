@@ -11,3 +11,4 @@ from scipy.spatial import Delaunay
 import ctypes
 from dataclasses import dataclass
 from itertools import zip_longest
+from enum import StrEnum, auto

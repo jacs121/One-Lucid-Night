@@ -83,7 +83,6 @@ class Player(Entity):
             ), dt*10)
             self.direction = Vec3(math.cos(rad), 0, math.sin(rad))
 
-
         if not gameState.tutorial_ended and tutorial.text == "TUTORIAL: FIND THE RUNE":
             if len(gameState.runes) and distance_2d(gameState.runes[0].position.xz, self.position.xz - self.direction.xz/2) <= gameState.runes[0].activation_distance:
                 tutorial.text = "TUTORIAL: INTERACT WITH A RUNE BY PRESSING SPACE"
@@ -379,9 +378,16 @@ def init_entities():
     global screen_shift, win_text, void_fade_in
     global title_text, start_game_text, void
     global ground, reload_image, experience_amount_ui
+    global reset_game, escape_background
 
     if "experience_amount_ui" in globals():
         destroy(experience_amount_ui)
+    
+    if "escape_background" in globals():
+        destroy(escape_background)
+
+    if "reset_game" in globals():
+        destroy(reset_game)
 
     if "tutorial" in globals():
         destroy(tutorial)
@@ -593,6 +599,21 @@ def init_entities():
         scale=(1.125, 0.125),
         position=(0, 1.512, 0),
         rotation=(90, 0, 0),
+        unlit=True,
+        enabled=False
+    )
+
+    reset_game = Button(
+        "RESET",
+        disabled=True,
+    )
+
+    escape_background = Entity(
+        model='plane',
+        scale=125,
+        y=0.15,
+        texture_scale=(5, 5),
+        color=color.rgb(1, 1, 1, 0.5),
         unlit=True,
         enabled=False
     )

@@ -49,6 +49,122 @@ def generate_triangle_texture(seed: str, width=512, height=512):
 
     return Texture(draw)
 
+def generate_eye_blob(
+        eye_seed: int,
+        resolution: int = 256,
+        radius_x: float = 0.30,
+        radius_y: float = 0.16,
+        randomness: float = 0.18,
+        num_points: int = 24,
+        scale: tuple[float, float] = (1.0, 0.5)
+    ):
+
+    np.random.seed(eye_seed)
+    lin = np.linspace(-1.0, 1.0, resolution)
+    X, Y = np.meshgrid(lin, lin)
+
+    Angle = np.arctan2(Y, X)
+
+    angles = np.linspace(-np.pi, np.pi, num_points, endpoint=False)
+
+    random_radius = np.random.uniform(
+        1.0 - randomness,
+        1.0 + randomness,
+        num_points
+    )
+
+    extended_angles = np.r_[angles - 2*np.pi, angles, angles + 2*np.pi]
+    extended_radius = np.tile(random_radius, 3)
+
+    radius_random = np.interp(
+        Angle.ravel(),
+        extended_angles,
+        extended_radius
+    ).reshape(Angle.shape)
+
+    base_radius = (
+        np.abs(np.sin(Angle)) ** 0.55
+        + 0.12
+    )
+
+    boundary_x = radius_x * radius_random
+    boundary_y = radius_y * radius_random * base_radius
+
+    normalized_x = (X / boundary_x) / scale[0]
+    normalized_y = (Y / boundary_y) / scale[1]
+
+    blob = (normalized_x ** 2 + normalized_y ** 2) <= 1.0
+
+    alpha = blob.astype(np.uint8) * 255
+    black = np.full(
+        (resolution, resolution),
+        0,
+        dtype=np.uint8
+    )
+
+    return Image.fromarray(
+        np.dstack((black, black, black, alpha))
+    )
+
+
+def generate_spike_ball(
+        seed: int,
+        resolution: int = 256,
+        base_radius: float = 0.25,
+        num_spikes: int = 35,
+        min_len: float = 0.25,
+        max_len: float = 0.64,
+        spike_sharpness: float = 4.5
+    ):
+    np.random.seed(seed)
+    lin = np.linspace(-1.0, 1.0, resolution)
+    X, Y = np.meshgrid(lin, lin)
+
+    R = np.sqrt(X**2 + Y**2)
+    Angle = np.arctan2(Y, X)
+
+    spike_angles = np.linspace(-np.pi, np.pi, num_spikes, endpoint=False)
+    spike_angles += np.random.uniform(-0.04, 0.04, num_spikes)
+    spike_lengths = np.random.uniform(min_len, max_len, num_spikes)
+
+    boundary_radius = np.zeros_like(Angle) + base_radius
+
+    for angle, length in zip(spike_angles, spike_lengths):
+        angular_distance = np.abs(Angle - angle)
+        angular_distance = np.minimum(angular_distance, 2 * np.pi - angular_distance)
+
+        max_width = (2 * np.pi / num_spikes) * 0.8
+
+        normalized_dist = np.maximum(0, 1 - (angular_distance / max_width))
+        spike_contour = (normalized_dist ** spike_sharpness) * length
+        boundary_radius = np.maximum(boundary_radius, base_radius + spike_contour)
+
+    bw_texture = (R <= boundary_radius).astype(np.uint8) * 255
+    white_channel = np.full((resolution, resolution), 255, dtype=np.uint8)
+
+    texture = Image.fromarray(np.dstack((white_channel, white_channel, white_channel, bw_texture)))
+    return texture
+
+def generate_sun_with_eye(eye_seed: int, sun_seed: int, resolution: int = 256, eye_size_ratio: float = 0.25, eye_open_ratio: float = 0.5, ):
+    texture = generate_spike_ball(sun_seed, resolution)
+
+    eye = generate_eye_blob(
+        eye_seed,
+        resolution=int(resolution*eye_size_ratio),
+        radius_x=0.30,
+        radius_y=0.16,
+        randomness=0.25,
+        scale=(max(1, eye_open_ratio),min(1, eye_open_ratio))
+    )
+
+    texture.paste(eye, (int(resolution/2-eye.width/2), int(resolution/2-eye.height/2), int(resolution/2+eye.width/2), int(resolution/2+eye.height/2)), eye)
+    return texture
+
+class SceneTypes(StrEnum):
+    MAIN_MENU = auto()
+    GAME = auto()
+    ESCAPE = auto()
+
 @dataclass
 class GameState:
     enemies: list
@@ -60,7 +176,7 @@ class GameState:
     game_won: bool
     tutorial_ended: bool
 
-    main_menu: bool
+    scene_type: SceneTypes
 
     waves: list[dict[str, list]]
     waiting_to_advance: bool

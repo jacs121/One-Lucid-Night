@@ -17,16 +17,23 @@ from enemies import *
 from runes import *
 
 def input(key):
-    if gameState.main_menu:
+    if gameState.scene_type == SceneTypes.MAIN_MENU:
+        window.exit_button.disable()
         if key == "space" and void_fade_in.finished:
             print("starting game")
-            gameState.main_menu = False
+            gameState.scene_type = "GAME"
             start_game()
         elif key == "enter" and void_fade_in.finished:
             print("starting game")
-            gameState.main_menu = False
+            gameState.scene_type = "GAME"
             start_game(True)
         return
+    elif gameState.scene_type == SceneTypes.GAME and key == "escape":
+        window.exit_button.enable()
+        gameState.scene_type = "ESCAPE"
+    elif gameState.scene_type == SceneTypes.ESCAPE and key == "escape":
+        window.exit_button.disable()
+        gameState.scene_type = "GAME"
 
     if not player.reloading and player.enabled:
         if key == 'left mouse down' and player.shotgun_ammo_count > 0:
@@ -282,6 +289,12 @@ def update_game(dt: float):
         -0.1,
         player.z
     )
+    
+    escape_background.position = (
+        player.x,
+        0.15,
+        player.z
+    )
 
     gameState.alive_enemies = 0
     for enemy in gameState.enemies:
@@ -321,6 +334,7 @@ def update_game(dt: float):
 
 def start_game(skip_tutorial: bool = False):
     Audio("audio/ambient.wav", loop=True)
+
     if skip_tutorial:
         gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
         gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
@@ -354,8 +368,10 @@ main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 def update():
     dt = time.dt
 
-    if not gameState.main_menu:
+    if gameState.scene_type == SceneTypes.GAME:
         update_game(dt)
+    elif gameState.scene_type == SceneTypes.ESCAPE:
+        return
 
     gameState.void_noise_timer += dt
     if gameState.void_noise_timer > 1.5:
@@ -368,8 +384,8 @@ def update():
 
 window.fps_counter.enabled = False
 window.entity_counter.enabled = False
-window.exit_button.enabled = False
 window.collider_counter.enabled = False
 window.cog_button.enabled = False
+reset_game.on_click = restart_game
 
 app.run()
