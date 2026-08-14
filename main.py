@@ -1,3 +1,4 @@
+import atexit
 from ursina import *
 
 print("frozen execution:", getattr(sys, 'frozen', False))
@@ -14,11 +15,18 @@ else:
     application.asset_folder = (Path(__file__).parent  / "assets").absolute()
 
 print("assets located at:", application.asset_folder)
+save_location = application.asset_folder / ".." / "save_data.cmp"
+print("game save located at:", save_location)
 
 from entities import *
 from items import *
 from enemies import *
 from runes import *
+
+if os.path.exists(save_location):
+    saveStates = SaveStates.load_file(save_location)
+else:
+    saveStates = SaveStates.init()
 
 def input(key):
     if gameState.scene_type == SceneTypes.MAIN_MENU:
@@ -143,11 +151,12 @@ for (item, rune, enemy) in zip_longest(Item.__subclasses__(), Rune.__subclasses_
     if enemy:
         available_enemies.update({enemy.__name__[:-5]: enemy})
 
-wave_filepath = "./waves.json"
+wave_location = "./waves.json"
 
-if not os.path.exists(wave_filepath):
-    wave_filepath = application.asset_folder / "waves.json"
+if not os.path.exists(wave_location):
+    wave_location = application.asset_folder / "waves.json"
 
+print("wave data located at:", wave_location)
 
 def element_number_converter(value) -> float:
     if isinstance(value, str):
@@ -191,7 +200,7 @@ def load_waves(filepath: str):
 
     return waves
 
-gameState.waves = load_waves(wave_filepath)
+gameState.waves = load_waves(wave_location)
 
 def dialogCallback3():
 
@@ -241,7 +250,7 @@ def restart_game():
         destroy(entity)
 
     gameState = GameState.default()
-    gameState.waves = load_waves(wave_filepath)
+    gameState.waves = load_waves(wave_location)
 
     init_entities()
 
@@ -392,4 +401,5 @@ window.collider_counter.enabled = False
 window.cog_button.enabled = False
 reset_game.on_click = restart_game
 
+atexit.register(lambda: (saveStates.save_data(save_location)))
 app.run()

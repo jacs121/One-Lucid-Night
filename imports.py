@@ -9,6 +9,8 @@ from ursina import *
 from panda3d.core import PartSubset
 from scipy.spatial import Delaunay
 import ctypes
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from itertools import zip_longest
 from enum import StrEnum, auto
+import zstandard as zstd
+import atexit

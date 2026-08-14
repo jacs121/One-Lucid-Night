@@ -193,6 +193,30 @@ class GameState:
     def default(cls):
         return cls([], [], [], 0, False, False, False, True, [], False, False, 0, 0, 0, 0, 0)
 
+d_ctx = zstd.ZstdDecompressor()
+c_ctx = zstd.ZstdCompressor(level=3)
+
+
+@dataclass
+class SaveStates:
+    first_time: bool
+
+    @classmethod
+    def init(cls, **kwargs):
+        kwargs["first_time"] = kwargs.get("first_time", True)
+        return cls(kwargs)
+
+    @classmethod
+    def load_file(cls, filename: str):
+        cls.init(**json.loads(d_ctx.decompress(open(filename, "rb").read()).decode()))
+
+    def save_data(self, filename: str):
+        compressed_data = c_ctx.compress(str(self).encode('utf-8'))
+        open(filename, "wb").write(compressed_data)
+
+    def __str__(self):
+        return json.dumps(asdict(self))
+
 gameState = GameState.default()
 
 GROUND_NOISE_SCALE = 3.5

@@ -4,3 +4,4 @@ panda3d
 pillow
 ursina
 scipy
+zstandard
