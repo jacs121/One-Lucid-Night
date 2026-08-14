@@ -136,6 +136,7 @@ class StaticonEnemy(Enemy):
         if self.enabled:
             print("a staticon has been summoned:")
             print("    model:", self.model)
+            print("    position:", position)
             print("    available animation:")
             print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
             print("    animation:", "idle")
@@ -262,6 +263,7 @@ class ObeliskusEnemy(Enemy):
 
         if self.enabled:
             print("a obeliskus has been summoned:")
+            print("    position:", position)
             print("    model:", self.model)
             print("    available animation:")
             print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
@@ -374,6 +376,7 @@ class MaimeEnemy(Enemy):
 
         if self.enabled:
             print("a maime has been summoned:")
+            print("    position:", item.position)
             print("    item disguised:", self.model)
             print("        MODEL: item/", item.label.text.lower().replace(" ", "_"))
             print("        SCALE:", self.itemData[1])
@@ -476,6 +479,15 @@ class Diatrum(Enemy):
             color=color.rgb(1, 1, 1, 0),
             unlit=True
         )
+        if self.enabled:
+            print("a diatrum has been summoned:")
+            print("    position:", position)
+            print("    stats:")
+            print("        SIZE:", self.scale.length())
+            print("        HEALTH/MAX_HEALTH:", self.health)
+            print("        AWARENESS_RANGE:", self.awareness_range)
+            print("    texture seeds:", *self.texture_seeds)
+            print("    game ai:", self.ai_active)
 
     def update_entity(self, dt):
         if self.health != 0 and self.ai_active:
