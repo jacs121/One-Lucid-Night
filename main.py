@@ -1,8 +1,12 @@
 from ursina import *
 
 print("frozen execution:", getattr(sys, 'frozen', False))
-if getattr(sys, 'frozen', False) and len(sys.argv) == 3 and sys.argv[1] == "--loggingFile":
-    sys.stdout = open(sys.argv[2]+".txt", "w")
+if getattr(sys, 'frozen', False) and len(sys.argv) == 3:
+    os.makedirs("./logs", exist_ok=True)
+    if sys.argv[1] == "--loggingFile":
+        sys.stdout = open("./logs/"+sys.argv[2]+".log", "w")
+    else:
+        sys.stdout = open("./logs/latest.log", "w")
 
 if getattr(sys, 'frozen', False):
     application.asset_folder = (Path(sys._MEIPASS) / "assets").absolute()
