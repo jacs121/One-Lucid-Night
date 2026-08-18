@@ -450,17 +450,17 @@ class MaimeEnemy(Enemy):
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
 
-class Diatrum(Enemy):
+class DiatrumEnemy(Enemy):
     def __init__(self, position: tuple[float, float, float] = (0, 1.3, 0), max_health = 10, awareness_range: int = 10, ai_active: bool = True):
         super().__init__(
-            model="square",
+            model="cube",
             position=position,
             scale=2,
             max_health=max_health,
             color=color.white
         )
         
-        self.texture_seeds = (random.random(), random.random())
+        self.texture_seeds = (int(random.random()*1000000), int(random.random()*1000000))
         self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
         
 
@@ -502,11 +502,11 @@ class Diatrum(Enemy):
             if self.awareness_range >= dist:
                 self.animation_timer += dt
                 if self.animation_timer > 5:
-                    self.texture_seeds = (self.texture_seeds[0], random.random())
+                    self.texture_seeds = (self.texture_seeds[0], int(random.random()*1000000))
                     self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
 
                 if 0 < int(self.blinding_timer*5) % 1 < 0.1:
-                    self.texture_seeds = (random.random(), self.texture_seeds[0])
+                    self.texture_seeds = (int(random.random()*1000000), self.texture_seeds[0])
                     self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1], eye_open_ratio=self.blinding_timer/2 + 0.5)
 
                 self.burn_timer += dt

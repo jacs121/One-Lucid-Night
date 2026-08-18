@@ -383,63 +383,6 @@ def init_entities():
     global ground, reload_image, experience_amount_ui
     global reset_game, escape_background
 
-    if "experience_amount_ui" in globals():
-        destroy(experience_amount_ui)
-    
-    if "escape_background" in globals():
-        destroy(escape_background)
-
-    if "reset_game" in globals():
-        destroy(reset_game)
-
-    if "tutorial" in globals():
-        destroy(tutorial)
-
-    if "reload_image" in globals():
-        destroy(reload_image)
-
-    if "shotgun" in globals():
-        destroy(shotgun)
-
-    if "shotgun_ammo_ui" in globals():
-        destroy(shotgun_ammo_ui)
-
-    if "shotgun_pump" in globals():
-        destroy(shotgun_pump)
-
-    if "ammo_packets_count_ui" in globals():
-        destroy(ammo_packets_count_ui)
-
-    if "crosshair" in globals():
-        destroy(crosshair)
-
-    if "crosshair_ring" in globals():
-        destroy(crosshair_ring)
-
-    if "pump_bar_bg" in globals():
-        destroy(pump_bar_bg)
-
-    if "pump_bar_fill" in globals():
-        destroy(pump_bar_fill)
-
-    if "screen_shift" in globals():
-        destroy(screen_shift)
-
-    if "win_text" in globals():
-        destroy(win_text)
-
-    if "title_text" in globals():
-        destroy(title_text)
-
-    if "start_game_text" in globals():
-        destroy(start_game_text)
-
-    if "void" in globals():
-        destroy(void)
-
-    if "ground" in globals():
-        destroy(ground)
-
     tutorial = Text(
         text="",
         color=color.yellow,
@@ -626,6 +569,72 @@ def init_entities():
         unlit=True,
         enabled=False
     )
+
+def remove_entities():
+    global tutorial, shotgun_ammo_ui, shotgun
+    global crosshair, crosshair_ring, player
+    global screen_shift, win_text, void_fade_in
+    global start_game_text, ground, pump_bar_bg
+    global shotgun_pump, ammo_packets_count_ui, pump_bar_fill
+    global title_text, void, experience_amount_ui
+    global reset_game, escape_background, reload_image
+
+    if "experience_amount_ui" in globals():
+        destroy(experience_amount_ui)
+    
+    if "escape_background" in globals():
+        destroy(escape_background)
+
+    if "reset_game" in globals():
+        destroy(reset_game)
+
+    if "tutorial" in globals():
+        destroy(tutorial)
+
+    if "reload_image" in globals():
+        destroy(reload_image)
+
+    if "shotgun" in globals():
+        destroy(shotgun)
+
+    if "shotgun_ammo_ui" in globals():
+        destroy(shotgun_ammo_ui)
+
+    if "shotgun_pump" in globals():
+        destroy(shotgun_pump)
+
+    if "ammo_packets_count_ui" in globals():
+        destroy(ammo_packets_count_ui)
+
+    if "crosshair" in globals():
+        destroy(crosshair)
+
+    if "crosshair_ring" in globals():
+        destroy(crosshair_ring)
+
+    if "pump_bar_bg" in globals():
+        destroy(pump_bar_bg)
+
+    if "pump_bar_fill" in globals():
+        destroy(pump_bar_fill)
+
+    if "screen_shift" in globals():
+        destroy(screen_shift)
+
+    if "win_text" in globals():
+        destroy(win_text)
+
+    if "title_text" in globals():
+        destroy(title_text)
+
+    if "start_game_text" in globals():
+        destroy(start_game_text)
+
+    if "void" in globals():
+        destroy(void)
+
+    if "ground" in globals():
+        destroy(ground)
 
 init_entities()
 window.on_window_resize = reposition

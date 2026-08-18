@@ -35,7 +35,7 @@ def input(key):
             print("starting game")
             gameState.scene_type = SceneTypes.GAME
             start_game()
-        elif key == "enter" and void_fade_in.finished:
+        elif key == "enter" and void_fade_in.finished and (not getattr(sys, 'frozen', False) or not saveStates.first_time):
             window.exit_button.disable()
             print("starting game")
             gameState.scene_type = SceneTypes.GAME
@@ -49,11 +49,13 @@ def input(key):
             reset_game.enable()
             gameState.scene_type = SceneTypes.ESCAPE
             pauseAllAudio(True)
+            pauseAllSequences(True)
         elif gameState.scene_type == SceneTypes.ESCAPE and key == "escape":
             window.exit_button.disable()
             escape_background.disable()
             reset_game.disable()
             pauseAllAudio(False)
+            pauseAllSequences(False)
             gameState.scene_type = SceneTypes.GAME
         if gameState.scene_type == SceneTypes.GAME:
             if key == 'left mouse down' and player.shotgun_ammo_count > 0:
@@ -159,7 +161,7 @@ for (item, rune, enemy) in zip_longest(Item.__subclasses__(), Rune.__subclasses_
     if enemy:
         available_enemies.update({enemy.__name__[:-5]: enemy})
 
-wave_location = "./waves.json"
+wave_location = "./test_waves.json"
 
 if not os.path.exists(wave_location):
     wave_location = application.asset_folder / "waves.json"
@@ -241,12 +243,7 @@ def dialogCallback1():
     ShowDialog("and why do I have a shotgun?!").dialog_callback = dialogCallback2
 
 def restart_game():
-    global gameState
-
-    global tutorial, shotgun_ammo_ui, ammo_packets_count_ui
-    global crosshair, crosshair_ring, player
-    global screen_shift, win_text, void_fade_in
-    global start_game_text, ground, main_menu_music
+    global tutorial, player, start_game_text, main_menu_music, gameState
 
     destroy(player)
     player = Player()
@@ -261,8 +258,9 @@ def restart_game():
     gameState = GameState.default()
     gameState.waves = load_waves(wave_location)
 
+    remove_entities()
     init_entities()
-    start_game_text.text += "" if saveStates.first_time else "/press enter to start a run"
+    start_game_text.text += "" if saveStates.first_time else " / press enter to start a run"
 
     main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0, autoplay=True)
     main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
@@ -385,15 +383,15 @@ main_menu_music.animate("volume", 0.75, 2, curve=curve.linear)
 def update():
     dt = time.dt
 
-    if gameState.scene_type == SceneTypes.GAME:
-        update_game(dt)
-    elif gameState.scene_type == SceneTypes.ESCAPE:
+    if gameState.scene_type == SceneTypes.ESCAPE:
         escape_background.position = (
             player.x,
             0.15,
             player.z
         )
         return
+    elif gameState.scene_type == SceneTypes.GAME:
+        update_game(dt)
 
     gameState.void_noise_timer += dt
     if gameState.void_noise_timer > 1.5:

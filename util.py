@@ -11,6 +11,14 @@ def pauseAllAudio(pause: bool):
             else:
                 entity.resume()
 
+def pauseAllSequences(pause: bool):
+    for entity in scene.entities:
+        if isinstance(entity, Sequence):
+            if pause:
+                entity.pause()
+            else:
+                entity.resume()
+
 def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')
     mat = np.array(list(hashlib.shake_256(data).digest(width * height)), dtype=np.uint8)
