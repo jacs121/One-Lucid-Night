@@ -34,7 +34,7 @@ class Player(Entity):
         self.last_mouse_y = mouse.y
         self.direction = Vec3(0)
         self.experience = 0
-        self.shotgun_pellet_count = 2
+        self.shotgun_pellet_count = 1
 
         self.shotgun_ammo_count = 0
         self.ammo_packets_count = 0
@@ -206,7 +206,7 @@ class Player(Entity):
                         else:
                             rangeMultiplier = max(0.0, 1.0 - ((t - 1.5) / 23.5))
 
-                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage * rangeMultiplier * random.uniform(0.95, 1.05))
+                        bullets_hit[entity] = bullets_hit.get(entity, 0) + (self.attack_damage * rangeMultiplier * random.uniform(0.38, 0.75))
                         hit = True
                         ray = Entity(
                             model='quad',
@@ -234,7 +234,7 @@ class Player(Entity):
 
         for entity, damage in bullets_hit.items():
             entity.damage(damage)
-            print(damage) # todo: rebalance the final damage
+            print(damage)
             if entity.health == 0:
                 self.experience += int(damage*10)/10
 
