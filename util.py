@@ -13,11 +13,13 @@ def pauseAllAudio(pause: bool):
 
 def pauseAllSequences(pause: bool):
     for entity in scene.entities:
-        if isinstance(entity, Sequence):
-            if pause:
-                entity.pause()
-            else:
-                entity.resume()
+        if isinstance(entity, Entity):
+            for animation in entity.animations:
+                if isinstance(entity, Sequence):
+                    if pause:
+                        animation.pause()
+                    else:
+                        animation.resume()
 
 def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')

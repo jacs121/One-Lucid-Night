@@ -503,7 +503,7 @@ def init_entities():
         unlit=True
     )
 
-    void_fade_in = void.fade_in(1, duration=3, curve=curve.linear)
+    void_fade_in = void.fade_in(1, duration=4, curve=curve.combine(curve_a=curve.zero, curve_b=curve.linear, split_at=0.25))
 
     ground.set_shader_input(
         "position", Vec2(0)

@@ -129,7 +129,7 @@ def input(key):
         tutorial.text = "TUTORIAL: PRESS ESCAPE TO GO BACK"
         Audio("audio/shotgun/close_chamber.mp3")
         reload_image.texture = '/textures/reloading/continue.png'
-        shotgun_ammo_ui.disable()
+        shotgun_ammo_ui.text = "AMMO: CLOSED"
         player.reload_step = 4
 
     elif player.reload_step == 4 and key == 'escape':
@@ -138,6 +138,7 @@ def input(key):
         reload_image.disable()
         ammo_packets_count_ui.disable()
         experience_amount_ui.disable()
+        shotgun_ammo_ui.disable()
         if len(gameState.enemies) <= 0:
             if player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT:
                 tutorial.text = "TUTORIAL: TOUCH THE ITEM"
@@ -213,7 +214,6 @@ def load_waves(filepath: str):
 gameState.waves = load_waves(wave_location)
 
 def dialogCallback3():
-
     crosshair_ring.color = color.rgb(crosshair_ring.color.r, crosshair_ring.color.g, crosshair_ring.color.b, 1)
     crosshair.color = color.rgb(crosshair.color.r, crosshair.color.g, crosshair.color.b, 1)
     tutorial.text = "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"
@@ -350,13 +350,16 @@ def update_game(dt: float):
 def start_game(skip_tutorial: bool = False):
     Audio("audio/ambient.wav", loop=True)
 
+    invoke(main_menu_music.stop, delay=1.5)
+    ground.fade_in(1, duration=1.5)
+    main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
+    main_menu_music.animate("volume", 0, 1.5, curve=curve.linear)
+
     if skip_tutorial:
         gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
         gameState.items.append(AmmoBoxItem((random.choice([-1, 1])*random.uniform(1.5, 3), 0.3, random.choice([-1, 1])*random.uniform(1.5, 3))))
         gameState.enemies.append(StaticonEnemy((15, 0.3, 15)))
         gameState.tutorial_ended = True
-        main_menu_music.stop()
-        ground.color = color.rgb(*ground.color.rgb, 1)
         tutorial.text = "TUTORIAL SKIPPED"
         invoke(tutorial.disable, delay=1)
         crosshair.enable()
@@ -365,10 +368,6 @@ def start_game(skip_tutorial: bool = False):
         title_text.disable()
     else:
         invoke(lambda: setattr(ShowDialog("where am I..."), "dialog_callback", dialogCallback1), delay=3)
-        invoke(main_menu_music.stop, delay=1.5)
-        ground.fade_in(1, duration=3)
-        main_menu_music.animate("pitch", 0, 1.5, curve=curve.linear)
-        main_menu_music.animate("volume", 0, 1.5, curve=curve.linear)
         title_text.fade_out()
 
     void_fade_in.finish()
