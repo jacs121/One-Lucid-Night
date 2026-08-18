@@ -3,6 +3,14 @@ from imports import *
 title = "One Lucid Night"
 app = Ursina(title)
 
+def pauseAllAudio(pause: bool):
+    for entity in scene.entities:
+        if isinstance(entity, Audio):
+            if pause:
+                entity.pause()
+            else:
+                entity.resume()
+
 def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_value: int = 0, max_value: int = 255):
     data = seed.encode('utf-8')
     mat = np.array(list(hashlib.shake_256(data).digest(width * height)), dtype=np.uint8)
@@ -191,11 +199,10 @@ class GameState:
 
     @classmethod
     def default(cls):
-        return cls([], [], [], 0, False, False, False, True, [], False, False, 0, 0, 0, 0, 0)
+        return cls([], [], [], 0, False, False, False, SceneTypes.MAIN_MENU, [], False, False, 0, 0, 0, 0, 0)
 
 d_ctx = zstd.ZstdDecompressor()
 c_ctx = zstd.ZstdCompressor(level=3)
-
 
 @dataclass
 class SaveStates:
@@ -203,12 +210,12 @@ class SaveStates:
 
     @classmethod
     def init(cls, **kwargs):
-        kwargs["first_time"] = kwargs.get("first_time", True)
+        kwargs.update({"first_time": True})
         return cls(kwargs)
 
     @classmethod
     def load_file(cls, filename: str):
-        cls.init(**json.loads(d_ctx.decompress(open(filename, "rb").read()).decode()))
+        return cls.init(**json.loads(d_ctx.decompress(open(filename, "rb").read()).decode()))
 
     def save_data(self, filename: str):
         compressed_data = c_ctx.compress(str(self).encode('utf-8'))

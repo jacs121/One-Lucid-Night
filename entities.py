@@ -234,8 +234,9 @@ class Player(Entity):
 
         for entity, damage in bullets_hit.items():
             entity.damage(damage)
+            print(damage) # todo: rebalance the final damage
             if entity.health == 0:
-                self.experience += damage
+                self.experience += int(damage*10)/10
 
     def update_shotgun(self, dt):
         if self.shotgun_pumping:
@@ -336,6 +337,7 @@ def reposition():
     shotgun_ammo_ui.x = -window.aspect_ratio / 2 + .02
     ammo_packets_count_ui.x = -window.aspect_ratio / 2 + .02
     tutorial.x = -window.aspect_ratio / 2 + .02
+    experience_amount_ui.x = -window.aspect_ratio / 2 + .02
 
 class ShowDialog(Entity):
     def __init__(self, text: str = "", dialog_speed: float = 1/15):
@@ -350,17 +352,18 @@ class ShowDialog(Entity):
         self.dialog_timer = 0
 
     def update(self):
-        dt = time.dt
-        if self.dialog_timer < len(self.dialog_text) + 2/self.dialog_speed:
-            self.dialog_timer += dt/self.dialog_speed
-            if self.label.text != self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]:
-                Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True)
-                self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
-        else:
-            self.dialog_callback()
+        if gameState.scene_type == SceneTypes.GAME:
+            dt = time.dt
+            if self.dialog_timer < len(self.dialog_text) + 2/self.dialog_speed:
+                self.dialog_timer += dt/self.dialog_speed
+                if self.label.text != self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]:
+                    Audio("audio/dialog_pop.mp3", autoplay=True, auto_destroy=True)
+                    self.label.text = self.dialog_text[:int(min(self.dialog_timer, len(self.dialog_text)))]
+            else:
+                self.dialog_callback()
 
-            destroy(self.label)
-            destroy(self)
+                destroy(self.label)
+                destroy(self)
 
     def input(self, key):
         if key == "enter" and self.dialog_timer < len(self.dialog_text):
@@ -464,7 +467,7 @@ def init_entities():
         text=f"{player.experience} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY",
         color=color.orange if player.experience > 0 else color.red,
         origin=(-0.5, 0.5),
-        position=(-0.5, 0.425),
+        position=(-0.5, 0.4),
         enabled=False
     )
 
@@ -576,7 +579,7 @@ def init_entities():
     )
 
     start_game_text = Text(
-        text="press space to start",
+        text="press space to start tutorial",
         origin=(0, -0.45),
         position=(0, -0.45),
         color=color.rgba(1,1,1,0)
@@ -587,6 +590,7 @@ def init_entities():
         model='quad',
         texture='textures/reloading/get_bullet.png',
         scale=(87/100, 13/100),
+        y=0.1,
         position=(0, 0),
         color=color.white,
         enabled=False
@@ -605,7 +609,12 @@ def init_entities():
 
     reset_game = Button(
         "RESET",
-        disabled=True,
+        scale=(0.175, 0.05),
+        enabled=False,
+        color=color.rgb(0.5, 0.5, 0.5),
+        text_color=color.rgb(0.25, 0.25, 0.25),
+        origin=(0, -0.5),
+        position=(0, -0.45),
     )
 
     escape_background = Entity(
@@ -613,7 +622,7 @@ def init_entities():
         scale=125,
         y=0.15,
         texture_scale=(5, 5),
-        color=color.rgb(1, 1, 1, 0.5),
+        color=color.rgb(0, 0, 0, 0.5),
         unlit=True,
         enabled=False
     )

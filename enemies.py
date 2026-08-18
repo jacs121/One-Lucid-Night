@@ -246,7 +246,7 @@ class StaticonEnemy(Enemy):
             self.update_texture_offset()
 
 class ObeliskusEnemy(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 0.5, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True):
         super().__init__(
             model="models/obeliskus.glb",
             position=position,
@@ -313,7 +313,7 @@ class ObeliskusEnemy(Enemy):
                     if angle_diff > 4:
                         self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     else:
-                        if dist <= self.attack_range*self.scale.length():
+                        if dist <= self.attack_range:
                             if self.attacking_timer <= 0:
                                 self.attacking_timer = 2.5
                             else:

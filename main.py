@@ -29,61 +29,69 @@ else:
     saveStates = SaveStates.init()
 
 def input(key):
-    if gameState.scene_type == SceneTypes.MAIN_MENU:
-        window.exit_button.disable()
+    if gameState.scene_type == SceneTypes.MAIN_MENU and start_game_text.color.a == 1:
         if key == "space" and void_fade_in.finished:
+            window.exit_button.disable()
             print("starting game")
-            gameState.scene_type = "GAME"
+            gameState.scene_type = SceneTypes.GAME
             start_game()
         elif key == "enter" and void_fade_in.finished:
+            window.exit_button.disable()
             print("starting game")
-            gameState.scene_type = "GAME"
+            gameState.scene_type = SceneTypes.GAME
             start_game(True)
         return
-    elif gameState.scene_type == SceneTypes.GAME and key == "escape":
-        window.exit_button.enable()
-        gameState.scene_type = "ESCAPE"
-    elif gameState.scene_type == SceneTypes.ESCAPE and key == "escape":
-        window.exit_button.disable()
-        gameState.scene_type = "GAME"
 
     if not player.reloading and player.enabled:
-        if key == 'left mouse down' and player.shotgun_ammo_count > 0:
-            player.shoot()
-        elif key == "left mouse down" and player.shotgun_ammo_count == 0:
-            Audio("audio/shotgun/empty_clink.mp3")
-        elif key == 'r' and (player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN"):
-            player.reloading = True
-            reload_image.enable()
-            shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
-            experience_amount_ui.text = f"{player.experience} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY"
-            shotgun_ammo_ui.enable()
-            experience_amount_ui.enable()
-            ammo_packets_count_ui.enable()
-            ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
-            shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
-            experience_amount_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
-            if player.ammo_packets_count > 0:
-                tutorial.text = "TUTORIAL: PRESS LEFT ARROW TO GET A BULLET"
-                ammo_packets_count_ui.text = f"{player.ammo_packets_count} AMMO PACKETS"
-                player.reload_step = 1
-                reload_image.texture = '/textures/reloading/get_bullet.png'
-            else:
-                ammo_packets_count_ui.text = "[OUT OF AMMO PACKETS]"
+        if gameState.scene_type == SceneTypes.GAME and key == "escape":
+            window.exit_button.enable()
+            escape_background.enable()
+            reset_game.enable()
+            gameState.scene_type = SceneTypes.ESCAPE
+            pauseAllAudio(True)
+        elif gameState.scene_type == SceneTypes.ESCAPE and key == "escape":
+            window.exit_button.disable()
+            escape_background.disable()
+            reset_game.disable()
+            pauseAllAudio(False)
+            gameState.scene_type = SceneTypes.GAME
+        if gameState.scene_type == SceneTypes.GAME:
+            if key == 'left mouse down' and player.shotgun_ammo_count > 0:
+                player.shoot()
+            elif key == "left mouse down" and player.shotgun_ammo_count == 0:
+                Audio("audio/shotgun/empty_clink.mp3")
+            elif key == 'r' and (player.shotgun_ammo_count < SHOTGUN_MAX_AMMO_COUNT and gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS R TO LOAD SHOTGUN"):
+                player.reloading = True
+                reload_image.enable()
+                shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
+                experience_amount_ui.text = f"{player.experience:.2f} PROFICIENCY" if player.experience > 0 else "NO PROFICIENCY"
+                shotgun_ammo_ui.enable()
+                experience_amount_ui.enable()
+                ammo_packets_count_ui.enable()
+                ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
+                shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
+                experience_amount_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
+                if player.ammo_packets_count > 0:
+                    tutorial.text = "TUTORIAL: PRESS LEFT ARROW TO GET A BULLET"
+                    ammo_packets_count_ui.text = f"{player.ammo_packets_count} AMMO PACKETS"
+                    player.reload_step = 1
+                    reload_image.texture = '/textures/reloading/get_bullet.png'
+                else:
+                    ammo_packets_count_ui.text = "[OUT OF AMMO PACKETS]"
+                    player.reload_step = 3
+                    reload_image.texture = '/textures/reloading/close_chamber.png'
+            elif key == 'c' and (gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"):
+                player.reloading = True
+                reload_image.enable()
+                shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
+                shotgun_ammo_ui.enable()
+                experience_amount_ui.enable()
+                ammo_packets_count_ui.enable()
+                shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
+                ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
                 player.reload_step = 3
                 reload_image.texture = '/textures/reloading/close_chamber.png'
-        elif key == 'c' and (gameState.tutorial_ended or tutorial.text == "TUTORIAL: PRESS C TO CHECK SHOTGUN AMMO"):
-            player.reloading = True
-            reload_image.enable()
-            shotgun_ammo_ui.text = f"AMMO: {player.shotgun_ammo_count}/{SHOTGUN_MAX_AMMO_COUNT}"
-            shotgun_ammo_ui.enable()
-            experience_amount_ui.enable()
-            ammo_packets_count_ui.enable()
-            shotgun_ammo_ui.color = color.orange if player.shotgun_ammo_count > 0 else color.red
-            ammo_packets_count_ui.color=color.orange if player.ammo_packets_count > 0 else color.red
-            player.reload_step = 3
-            reload_image.texture = '/textures/reloading/close_chamber.png'
-        return
+            return
 
     # ---------- Reload controls ----------
     if player.reload_step == 1 and (key == 'left arrow up' or key == "a up"):
@@ -243,7 +251,8 @@ def restart_game():
     destroy(player)
     player = Player()
     for rune in gameState.runes:
-        rune.sound.stop()
+        if hasattr(rune, "sound"):
+            rune.sound.stop()
         destroy(rune)
 
     for entity in gameState.enemies+gameState.items:
@@ -253,6 +262,7 @@ def restart_game():
     gameState.waves = load_waves(wave_location)
 
     init_entities()
+    start_game_text.text += "" if saveStates.first_time else "/press enter to start a run"
 
     main_menu_music = Audio("audio/main_menu.wav", loop=True, pitch=0.25, volume=0, autoplay=True)
     main_menu_music.animate("pitch", 1, 1.5, curve=curve.linear)
@@ -300,12 +310,6 @@ def update_game(dt: float):
     void.position = (
         player.x,
         -0.1,
-        player.z
-    )
-    
-    escape_background.position = (
-        player.x,
-        0.15,
         player.z
     )
 
@@ -384,6 +388,11 @@ def update():
     if gameState.scene_type == SceneTypes.GAME:
         update_game(dt)
     elif gameState.scene_type == SceneTypes.ESCAPE:
+        escape_background.position = (
+            player.x,
+            0.15,
+            player.z
+        )
         return
 
     gameState.void_noise_timer += dt
