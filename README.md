@@ -2,6 +2,8 @@
 
 [link to the game](https://jacs121.itch.io/one-lucid-night)
 
+[custom wave creation API](WAVES.md)
+
 # Story
 
 One night, after a long day at work, you go to sleep in your room and start dreaming. But as your mind starts playing with memories and thoughts, you feel a shock through your spine as your vision goes black, falling into a dream you might never wake up from.
