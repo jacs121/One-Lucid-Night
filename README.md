@@ -2,7 +2,7 @@
 
 [link to the game](https://jacs121.itch.io/one-lucid-night)
 
-[custom wave creation API](WAVES.md)
+[custom wave creation API](docs/WAVES.md)
 
 # Story
 
