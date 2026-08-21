@@ -40,4 +40,4 @@ Fight waves of oddly creepy enemies; survive until the last wave (which is not y
 
 # Bugs, Issues, or Improvements
 
-If you have any bugs, issues, or improvements, please report them under issues
+If you have any bugs, issues, or improvements, please report them under issues or click [this link](https://github.com/jacs121/One-Lucid-Night/issues/new)
