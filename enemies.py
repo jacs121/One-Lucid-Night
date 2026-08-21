@@ -462,7 +462,6 @@ class DiatrumEnemy(Enemy):
         
         self.texture_seeds = (int(random.random()*1000000), int(random.random()*1000000))
         self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
-        
 
         self.awareness_range = awareness_range
         self.ai_active = ai_active
@@ -480,7 +479,7 @@ class DiatrumEnemy(Enemy):
         self.blinding_light = Entity(
             model='plane',
             scale=125,
-            y=0.25,
+            y=2,
             texture_scale=(5, 5),
             color=color.rgb(1, 1, 1, 0),
             unlit=True

@@ -1,4 +1,3 @@
-import atexit
 from ursina import *
 
 print("frozen execution:", getattr(sys, 'frozen', False))
@@ -47,6 +46,7 @@ def input(key):
             window.exit_button.enable()
             escape_background.enable()
             reset_game.enable()
+            directional_movement.enable()
             gameState.scene_type = SceneTypes.ESCAPE
             pauseAllAudio(True)
             pauseAllSequences(True)
@@ -54,6 +54,7 @@ def input(key):
             window.exit_button.disable()
             escape_background.disable()
             reset_game.disable()
+            directional_movement.disable()
             pauseAllAudio(False)
             pauseAllSequences(False)
             gameState.scene_type = SceneTypes.GAME

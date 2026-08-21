@@ -76,7 +76,7 @@ class Player(Entity):
     def update_player(self, dt):
         self.update_shotgun(dt)
 
-        rad = -math.radians(self.rotation_y)
+        rad = -math.radians(self.rotation_y if directional_movement.is_active else -90)
         if self.shotgun_ready:
             self.rotation_y = lerp_angle(self.rotation_y, math.degrees(
                 math.atan2(-mouse.y, mouse.x)
@@ -339,6 +339,34 @@ def reposition():
     tutorial.x = -window.aspect_ratio / 2 + .02
     experience_amount_ui.x = -window.aspect_ratio / 2 + .02
 
+class ToggleButton(Button):
+    def __init__(self, active: bool = False, active_color: color.Color = color.green, nonactive_color: color.Color = color.light_gray, label: str = "", text_size: int = 1, **kwargs):
+        super().__init__(**kwargs)
+
+        self.label = label
+        self.text_size = self.highlight_text_size = text_size
+        self.text_color = self.highlight_text_color = color.black
+        self.is_active = active
+        self.active_color = active_color
+        self.nonactive_color = nonactive_color
+
+        if self.is_active:
+            self.color = self.active_color
+            self.text = self.label+" ON"
+        else:
+            self.color = self.nonactive_color
+            self.text = self.label+" OFF"
+
+    def on_click(self):
+        self.is_active = not self.is_active 
+
+        if self.is_active:
+            self.color = self.active_color
+            self.text = self.label+" ON"
+        else:
+            self.color = self.nonactive_color
+            self.text = self.label+" OFF"
+
 class ShowDialog(Entity):
     def __init__(self, text: str = "", dialog_speed: float = 1/15):
         super().__init__()
@@ -381,7 +409,7 @@ def init_entities():
     global screen_shift, win_text, void_fade_in
     global title_text, start_game_text, void
     global ground, reload_image, experience_amount_ui
-    global reset_game, escape_background
+    global reset_game, escape_background, directional_movement
 
     tutorial = Text(
         text="",
@@ -560,6 +588,16 @@ def init_entities():
         position=(0, -0.45),
     )
 
+    directional_movement = ToggleButton(
+        active=True,
+        label="directional movement",
+        text_size=0.5,
+        scale=(0.175, 0.035),
+        origin=(0, -0.5),
+        position=(0, -0.375),
+        enabled=False,
+    )
+
     escape_background = Entity(
         model='plane',
         scale=125,
@@ -577,7 +615,7 @@ def remove_entities():
     global start_game_text, ground, pump_bar_bg
     global shotgun_pump, ammo_packets_count_ui, pump_bar_fill
     global title_text, void, experience_amount_ui
-    global reset_game, escape_background, reload_image
+    global reset_game, escape_background, reload_image, directional_movement
 
     if "experience_amount_ui" in globals():
         destroy(experience_amount_ui)
@@ -635,6 +673,9 @@ def remove_entities():
 
     if "ground" in globals():
         destroy(ground)
+
+    if "directional_movement" in globals():
+        destroy(directional_movement)
 
 init_entities()
 window.on_window_resize = reposition

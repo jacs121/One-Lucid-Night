@@ -106,7 +106,7 @@ def generate_eye_blob(
     )
 
     boundary_x = radius_x * radius_random
-    boundary_y = radius_y * radius_random * base_radius
+    boundary_y = boundary_x * base_radius
 
     normalized_x = (X / boundary_x) / scale[0]
     normalized_y = (Y / boundary_y) / scale[1]
