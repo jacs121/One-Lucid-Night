@@ -1,9 +1,0 @@
-[
-    [
-        {
-            "type": "enemy",
-            "enemies": ["Diatrum"],
-            "position": [0, 0]
-        }
-    ]
-]

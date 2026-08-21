@@ -167,7 +167,7 @@ for (item, rune, enemy) in zip_longest(Item.__subclasses__(), Rune.__subclasses_
     if enemy:
         available_enemies.update({enemy.__name__[:-5]: enemy})
 
-wave_location = "./test_waves.json"
+wave_location = "./waves.json"
 
 if not os.path.exists(wave_location):
     wave_location = application.asset_folder / "waves.json"
