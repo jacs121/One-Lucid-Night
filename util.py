@@ -217,10 +217,11 @@ c_ctx = zstd.ZstdCompressor(level=3)
 @dataclass
 class SaveStates:
     first_time: bool
+    directional_movement: bool
 
     @classmethod
     def init(cls, **kwargs):
-        kwargs.update({"first_time": True})
+        kwargs.update({"first_time": True, "directional_movement": True})
         return cls(kwargs)
 
     @classmethod
@@ -321,3 +322,5 @@ icon = ctypes.windll.user32.LoadImageW(
 
 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
 ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
+
+default_player_direction = -math.radians(-90)

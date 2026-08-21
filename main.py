@@ -27,6 +27,9 @@ if os.path.exists(save_location):
 else:
     saveStates = SaveStates.init()
 
+if saveStates.directional_movement != directional_movement.is_active:
+    directional_movement.on_click()
+
 def input(key):
     if gameState.scene_type == SceneTypes.MAIN_MENU and start_game_text.color.a == 1:
         if key == "space" and void_fade_in.finished:
@@ -384,6 +387,7 @@ def update():
     dt = time.dt
 
     if gameState.scene_type == SceneTypes.ESCAPE:
+        saveStates.directional_movement = directional_movement.is_active
         escape_background.position = (
             player.x,
             0.15,

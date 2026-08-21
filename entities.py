@@ -76,7 +76,7 @@ class Player(Entity):
     def update_player(self, dt):
         self.update_shotgun(dt)
 
-        rad = -math.radians(self.rotation_y if directional_movement.is_active else -90)
+        rad = -math.radians(self.rotation_y)
         if self.shotgun_ready:
             self.rotation_y = lerp_angle(self.rotation_y, math.degrees(
                 math.atan2(-mouse.y, mouse.x)
@@ -96,11 +96,11 @@ class Player(Entity):
             if self.move_input.length() and self.can_move:
                 self.move_input = self.move_input.normalized()
                 movement = Vec3(
-                    self.move_input.x * math.sin(rad) +
-                    self.move_input.z * math.cos(rad),
+                    self.move_input.x * math.sin(rad if directional_movement.is_active else default_player_direction) +
+                    self.move_input.z * math.cos(rad if directional_movement.is_active else default_player_direction),
                     0,
-                    self.move_input.x * math.cos(rad) +
-                    self.move_input.z * math.sin(rad)
+                    self.move_input.x * math.cos(rad if directional_movement.is_active else default_player_direction) +
+                    self.move_input.z * math.sin(rad if directional_movement.is_active else default_player_direction)
                 )
                 if self.move_input.x == -1 and not self.anim_controls["right"].playing:
                     self.anim_controls["right"].play()
