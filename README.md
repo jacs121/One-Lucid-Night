@@ -1,6 +1,6 @@
 > This is One Lucid Night (my first public game)
 
-[link to the game](https://jacs121.itch.io/one-lucid-night) [custom wave creation API](docs/WAVES.md)
+[link to the game](https://jacs121.itch.io/one-lucid-night) | [custom wave creation API](docs/WAVES.md)
 
 # Story
 
