@@ -455,11 +455,11 @@ class DiatrumEnemy(Enemy):
         super().__init__(
             model="cube",
             position=position,
-            scale=2,
+            scale=(4, 0, 4),
             max_health=max_health,
             color=color.white
         )
-        
+
         self.texture_seeds = (int(random.random()*1000000), int(random.random()*1000000))
         self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
 
@@ -470,20 +470,21 @@ class DiatrumEnemy(Enemy):
         self.blinding_retexture_timer = 0
         self.origin_position = position
         self.animation_timer = 0
-        
+
         self.set_shader_input(
             "texture_scale",
-            self.texture_scale / 10
+            Vec2(1)/self.scale.xz
         )
 
         self.blinding_light = Entity(
             model='plane',
             scale=125,
-            y=2,
+            y=0.15,
             texture_scale=(5, 5),
             color=color.rgb(1, 1, 1, 0),
             unlit=True
         )
+
         if self.enabled:
             print("a diatrum has been summoned:")
             print("    position:", position)
@@ -495,6 +496,9 @@ class DiatrumEnemy(Enemy):
             print("    game ai:", self.ai_active)
 
     def update_entity(self, dt):
+        if self.health == 0 and self.blinding_timer == 0:
+            return
+
         if self.health != 0 and self.ai_active:
             to_self = Vec3(
                 self.x - player.x,
@@ -506,17 +510,11 @@ class DiatrumEnemy(Enemy):
             dist = max(to_self.length() - self.scale.length() / 2, 0)
             if self.awareness_range >= dist:
                 self.animation_timer += dt
-                if self.animation_timer > 5:
+                if self.animation_timer > 1.5:
                     self.texture_seeds = (self.texture_seeds[0], int(random.random()*1000000))
-                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
+                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1], eye_open_ratio=0.5+self.blinding_timer/2)
+                    self.animation_timer = 0
 
-                if 0 < int(self.blinding_timer*5) % 1 < 0.1:
-                    self.texture_seeds = (int(random.random()*1000000), self.texture_seeds[0])
-                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1], eye_open_ratio=self.blinding_timer/2 + 0.5)
-
-                self.burn_timer += dt
-                if self.burn_timer > 4:
-                    self.burn_timer = 0
                 direction = to_self.normalized()
                 forward = Vec3(
                     math.cos(-math.radians(player.rotation_y)),
@@ -531,25 +529,32 @@ class DiatrumEnemy(Enemy):
 
                 if angle <= player.view_cone_half_angle:
                     self.blinding_timer += dt / 5
+                    self.burn_timer += dt
+                    if self.burn_timer > 4:
+                        self.burn_timer = 0
+                        self.attack(4)
                 else:
                     self.blinding_timer -= dt / 5
             else:
                 self.blinding_timer -= dt / 2.5
 
-            self.blinding_timer = clamp(self.blinding_timer, 0, 0.95)
-            if self.blinding_light.color.a != self.blinding_timer:
-                self.blinding_light.color = color.rgba(*self.blinding_light.color.rgb, self.blinding_timer)
+        elif self.blinding_timer > 0:
+            self.blinding_timer -= dt / 2.5
 
-            if self.blinding_timer != 0:
-                self.position = (
-                    self.origin_position[0] + random.uniform(-self.blinding_timer * 2, self.blinding_timer * 2),
-                    self.y,
-                    self.origin_position[2] + random.uniform(-self.blinding_timer * 2, self.blinding_timer * 2)
-                )
-                self.blinding_retexture_timer += dt
+        self.blinding_timer = clamp(floor(self.blinding_timer * 2550)/2550, 0, 0.95)
+        if self.blinding_light.color.a != self.blinding_timer:
+            self.blinding_light.color = color.rgba(*self.blinding_light.color.rgb, self.blinding_timer)
 
-                if self.blinding_retexture_timer > 2:
-                    self.texture = generate_sun_with_eye(self.texture_seeds[0], self.texture_seeds[1])
-                    self.blinding_retexture_timer = 0
-            else:
-                self.position = Vec3(*self.origin_position)
+        if self.blinding_timer != 0:
+            self.position = (
+                self.origin_position[0] + random.uniform(-self.blinding_timer/5, self.blinding_timer/5),
+                self.y,
+                self.origin_position[2] + random.uniform(-self.blinding_timer/5, self.blinding_timer/5)
+            )
+        else:
+            self.position = Vec3(*self.origin_position)
+
+        self.set_shader_input(
+            "position",
+            self.position.xz + (self.scale.xz / 2)
+        )

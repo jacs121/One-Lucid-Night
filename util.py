@@ -163,7 +163,7 @@ def generate_spike_ball(
     texture = Image.fromarray(np.dstack((white_channel, white_channel, white_channel, bw_texture)))
     return texture
 
-def generate_sun_with_eye(eye_seed: int, sun_seed: int, resolution: int = 256, eye_size_ratio: float = 0.25, eye_open_ratio: float = 0.5, ):
+def generate_sun_with_eye(eye_seed: int, sun_seed: int, resolution: int = 256, eye_size_ratio: float = 0.35, eye_open_ratio: float = 0.5):
     texture = generate_spike_ball(sun_seed, resolution)
 
     eye = generate_eye_blob(
@@ -221,8 +221,9 @@ class SaveStates:
 
     @classmethod
     def init(cls, **kwargs):
-        kwargs.update({"first_time": True, "directional_movement": True})
-        return cls(kwargs)
+        kwargs.setdefault("first_time", True)
+        kwargs.setdefault("directional_movement", True)
+        return cls(**kwargs)
 
     @classmethod
     def load_file(cls, filename: str):

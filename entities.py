@@ -561,7 +561,7 @@ def init_entities():
         model='quad',
         texture='textures/reloading/get_bullet.png',
         scale=(87/100, 13/100),
-        y=0.1,
+        y=0.2,
         position=(0, 0),
         color=color.white,
         enabled=False
@@ -601,7 +601,7 @@ def init_entities():
     escape_background = Entity(
         model='plane',
         scale=125,
-        y=0.15,
+        y=0.25,
         texture_scale=(5, 5),
         color=color.rgb(0, 0, 0, 0.5),
         unlit=True,

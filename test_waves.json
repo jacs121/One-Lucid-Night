@@ -3,7 +3,7 @@
         {
             "type": "enemy",
             "enemies": ["Diatrum"],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
+            "position": [0, 0]
         }
     ]
 ]

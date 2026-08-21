@@ -26,6 +26,7 @@ if os.path.exists(save_location):
     saveStates = SaveStates.load_file(save_location)
 else:
     saveStates = SaveStates.init()
+    saveStates.save_data(save_location)
 
 if saveStates.directional_movement != directional_movement.is_active:
     directional_movement.on_click()
@@ -406,7 +407,7 @@ def update():
         if start_game_text.color.a == 0:
             start_game_text.fade_in(duration=1)
 
-window.fps_counter.enabled = False
+# window.fps_counter.enabled = False
 window.entity_counter.enabled = False
 window.collider_counter.enabled = False
 window.cog_button.enabled = False
