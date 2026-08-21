@@ -1,5 +1,5 @@
 
-[BACK](README.md)
+[BACK](https://github.com/jacs121/One-Lucid-Night)
 
 the waves are controlled via the `waves.json` file it contains a list of all waves with each element being a list of the entity selectors that provide the enemies, items and runes that will spawn at that wave
 
