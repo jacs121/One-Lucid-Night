@@ -587,10 +587,11 @@ class FeeterlugEnemy(Enemy):
         if dist < 0.1 and not self.biting:
             self.anim_controls["bite"].play()
             self.biting = True
-            player.can_move = False
         elif not self.biting and not self.anim_controls["idle"].is_playing():
             self.anim_controls["idle"].play()
         elif self.biting:
+            if player.can_move:
+                player.can_move = False
             self.bite_timer += dt
             if self.bite_timer >= 2.5:
                 self.bite_timer = 0

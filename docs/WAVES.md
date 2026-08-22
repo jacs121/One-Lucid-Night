@@ -35,7 +35,7 @@ and a rune selector looks like this:
 
 the first argument called `type` is specifying what this is (is it an item, is it an enemy, or is it a rune)
 
-the second argument is specific to each `type` and is giving a list of what has the possibility to actually spawn, meaning it picks a random name within the list
+the second argument is specific to each `type` and is giving a list of what has the possibility to actually spawn, meaning it picks a random name within the list (this argument only takes the names of what to spawn)
 
 the second argument is the `position` which is a 2 number long list for `(x, y)` and each side is calculated based on what it is set to:
 * using `{"min": A, "max": B}` would give a random number from `A` to `B`
