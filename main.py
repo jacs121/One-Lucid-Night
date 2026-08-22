@@ -309,7 +309,6 @@ def update_game(dt: float):
 
     player.update_player(dt)
 
-    # Void
     void.position = (
         player.x,
         -0.1,
@@ -407,7 +406,6 @@ def update():
         if start_game_text.color.a == 0:
             start_game_text.fade_in(duration=1)
 
-# window.fps_counter.enabled = False
 window.entity_counter.enabled = False
 window.collider_counter.enabled = False
 window.cog_button.enabled = False

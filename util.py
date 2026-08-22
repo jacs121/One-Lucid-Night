@@ -3,13 +3,19 @@ from imports import *
 title = "One Lucid Night"
 app = Ursina(title)
 
+paused_audio: set[Audio] = set()
+
 def pauseAllAudio(pause: bool):
+    if not pause:
+        for audio in paused_audio:
+            audio.resume()
+            paused_audio.remove(audio)
+        return
     for entity in scene.entities:
         if isinstance(entity, Audio):
-            if pause:
+            if pause and entity.playing:
                 entity.pause()
-            else:
-                entity.resume()
+                paused_audio.add(entity)
 
 def pauseAllSequences(pause: bool):
     for entity in scene.entities:
@@ -38,10 +44,10 @@ def generate_noise_texture(seed: str, width: int = 512, height: int = 512, min_v
     )
     return Texture(img)
 
-def generate_triangle_texture(seed: str, width=512, height=512):
-    data = seed.encode('utf-8')
-    seed = hashlib.sha512(data).digest().decode()
-    random = np.random.RandomState(seed)
+def generate_triangle_texture(seed: str, width=512, height=512, min_value: int = 0, max_value: int = 255):
+    data = seed.encode("utf-8")
+    seed_int = int.from_bytes(hashlib.sha512(data).digest(), byteorder="big")
+    random = np.random.RandomState(seed_int % (2**32))
 
     num_points = 150
     points = random.rand(num_points, 2) * [width - 24, height - 24]
@@ -58,14 +64,10 @@ def generate_triangle_texture(seed: str, width=512, height=512):
         p2 = tuple(all_points[simplex[1]])
         p3 = tuple(all_points[simplex[2]])
 
-        color = (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255),
-        )
-        draw.polygon([p1, p2, p3], fill=color)
+        color = random.randint(min_value, max_value)
+        draw.polygon([p1, p2, p3], fill=(color, color, color))
 
-    return Texture(draw)
+    return Texture(image)
 
 def generate_eye_blob(
         eye_seed: int,

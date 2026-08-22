@@ -254,11 +254,12 @@ class ObeliskusEnemy(Enemy):
             max_health=max_health
         )
 
+        self.texture = generate_triangle_texture(f"obeliskus_{self.x}_{self.z}")
+
         self.ai_active = ai_active
         self.speed=speed
         self.attack_range = attack_range
         self.awareness_range = awareness_range
-        self.attacked_timer = 0
         self.attacking_timer = 0
 
         if self.enabled:
@@ -279,24 +280,18 @@ class ObeliskusEnemy(Enemy):
         self.anim_controls["idle"].play()
 
     def update_entity(self, dt):
-        # Entity death visuals
-        if self.death_flash > 0:
-            self.death_flash -= dt
-            self.color = color.hsv(
-                0,
-                1,
-                self.death_flash
-            )
-        elif self.health != 0 and self.attacked_timer > 0:
-            self.attacked_timer -= dt
+        if self.health != 0 and self.damage_flash > 0:
+            self.damage_flash -= dt
             self.color = color.hsv(
                 0,
                 0,
-                lerp(1, 0, 1-1/(self.attacked_timer)),
+                lerp(0, 1, 1/(1 + self.damage_flash)),
             )
+            if self.damage_flash > 0:
+                self.texture = generate_triangle_texture(f"obeliskus_{self.x}_{self.z}_{self.damage_flash:0.25f}")
 
         elif self.health != 0:
-            self.attacked_timer = 0
+            self.damage_flash = 0
             self.color = color.white
 
         if self.health != 0 and self.ai_active:
@@ -307,7 +302,7 @@ class ObeliskusEnemy(Enemy):
             )
             dist = max(to_self.length() - self.scale.length() / 2, 0)
             if self.awareness_range > dist:
-                if self.attacked_timer <= 0:
+                if self.damage_flash <= 0:
                     target_rotation_y = math.degrees(math.atan2(to_self.x, to_self.z))
                     angle_diff = abs(((target_rotation_y % 360) - (self.rotation_y % 360) + 180) % 360 - 180)
                     if angle_diff > 4:
@@ -329,6 +324,7 @@ class ObeliskusEnemy(Enemy):
                                 self.speed * dt * self.scale.length() * (self.health/self.max_health) * (1 - 0.5 * int(player.reloading)),
                                 dist
                             )
+
             dx = player.x - self.x
             dz = player.z - self.z
 
@@ -337,12 +333,14 @@ class ObeliskusEnemy(Enemy):
             if not self.anim_controls["idle"].is_playing():
                 self.anim_controls["idle"].play()
 
-    def update_texture(self):
-        self.texture = generate_triangle_texture("obeliskus_"+str(int(self.position.x))+"_"+str(int(self.position.z)))
+        self.set_shader_input(
+            "position",
+            self.position.xz
+        )
 
     def damage(self, damage):
         if super().damage(damage) != "":
-            self.attacked_timer += 4 - min(self.attacked_timer/4, 3)
+            self.damage_flash *= 8
 
 class MaimeEnemy(Enemy):
     def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 15, ai_active: bool = True, exposed: bool = False):
