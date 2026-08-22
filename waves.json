@@ -43,12 +43,10 @@
         {
             "type": "item",
             "items": ["AmmoBox","AmmoBox",""],
-            "position": [[{"max": -1, "min": -4}, {"min": 1, "max": 4}], [{"min": 1, "max": 4}, {"max": -1, "min": -4}]]
-        },
-        {
-            "type": "item",
-            "items": ["AmmoBox"],
-            "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+            "position": [[{"max": -1, "min": -4}, {"min": 1, "max": 4}], [{"min": 1, "max": 4}, {"max": -1, "min": -4}]],
+            "##AmmoBox": {
+                "ammo": {"min": 8, "max": 14}
+            }
         },
         {
             "type": "item",
@@ -64,6 +62,11 @@
             "##Staticon": {
                 "attack_damage": {"min": 15, "max": 20}
             }
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Staticon"],
+            "position": [[{"max": -8, "min": "l"}, {"min": 8, "max": "r"}], [{"min": 8, "max": "t"}, {"max": -8, "min": "b"}]]
         },
         {
             "type": "enemy",
@@ -89,7 +92,7 @@
         },
         {
             "type": "item",
-            "items": ["AmmoBox"],
+            "items": ["AmmoBox", "Medicine"],
             "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
         }
     ]
