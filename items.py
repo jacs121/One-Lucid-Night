@@ -3,8 +3,13 @@ from entities import tutorial, player, ShowDialog
 
 class Item(Entity):
     def __init__(self, item_name: str, position: tuple[int, int, int] = (0, 1.3, 0), gather_distance: float = 0.5, enabled: bool = True):
+        model = "models/items/"+item_name.lower().replace(" ", "_")+".glb"
+        if not (application.asset_folder / model).exists():
+            print(f"model path for item {model} does not exist falling back to a sphere model")
+            model = "sphere"
+
         super().__init__(
-            model="model/items/"+item_name.lower().replace(" ", "_") if os.path.exists("model/items/"+item_name.lower().replace(" ", "_")) else "sphere",
+            model=model,
             scale=(0.75,0,0.75),
             unlit=True,
             rotation=(0,0,0),
