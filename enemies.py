@@ -151,7 +151,7 @@ class StaticonEnemy(Enemy):
 
     def damage(self, damage: int):
         damaged = super().damage(damage)
-        if damaged == "":
+        if damaged == None:
             return
         player_dist = Vec3(
             self.x - player.x,

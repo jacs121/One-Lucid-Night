@@ -198,19 +198,21 @@ def load_waves(filepath: str):
             if element_type == "item":
                 elementIndex = random.choice(element.pop("items"))
                 waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
-                waves[-1]["items"][-1].update(element)
+                waves[-1]["items"][-1].update(element.get(":"+elementIndex, {}))
             elif element_type == "rune":
                 elementIndex = random.choice(element.pop("runes"))
                 waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
-                waves[-1]["runes"][-1].update(element)
+                waves[-1]["runes"][-1].update(element.get(":"+elementIndex, {}))
             elif element_type == "enemy":
                 elementIndex = random.choice(element.pop("enemies"))
 
-                kwargs = {"enemy": available_enemies[elementIndex], "position": position}
-                kwargs.update(element)
-            
+                kwargs = {"enemy": available_enemies[elementIndex]}
+                kwargs.update(element.get(":"+elementIndex, {}))
+
                 if kwargs["enemy"] == MaimeEnemy:
                     kwargs["item"] = {"entity": random.choice(available_items), "position": position}
+                else:
+                    kwargs["position"] = position
 
                 waves[-1]["enemies"].append(kwargs)
 
