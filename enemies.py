@@ -103,7 +103,7 @@ class Enemy(Entity):
         self.position.z = clamp(self.position.z, BOUNDARY_REGION[1]+self.scale.z, BOUNDARY_REGION[3]-self.scale.z)
 
 class StaticonEnemy(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True, attack_damage: float = 16):
         super().__init__(
             model="models/staticon.glb",
             scale=size,
@@ -129,6 +129,7 @@ class StaticonEnemy(Enemy):
 
         self.attack_range = attack_range
         self.awareness_range = awareness_range
+        self.attack_damage = attack_damage
 
         self.anim_controls["attack"].setPlayRate(0.75)
         self.anim_controls["walking"].setPlayRate(2)
@@ -237,8 +238,8 @@ class StaticonEnemy(Enemy):
             elif self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 
-            if self.anim_controls["attack"].get_frame() == 15:
-                self.attack(16)
+            if self.anim_controls["attack"].get_frame() >= 15:
+                self.attack(self.attack_damage)
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
 
@@ -246,7 +247,7 @@ class StaticonEnemy(Enemy):
             self.update_texture_offset()
 
 class ObeliskusEnemy(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 0.5, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 0.5, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True, attack_damage: float = 10):
         super().__init__(
             model="models/obeliskus.glb",
             position=position,
@@ -261,6 +262,7 @@ class ObeliskusEnemy(Enemy):
         self.attack_range = attack_range
         self.awareness_range = awareness_range
         self.attacking_timer = 0
+        self.attack_damage = attack_damage
 
         if self.enabled:
             print("a obeliskus has been summoned:")
@@ -309,10 +311,10 @@ class ObeliskusEnemy(Enemy):
                         self.rotation_y = lerp_angle(self.rotation_y, target_rotation_y, time.dt * 5)
                     else:
                         if dist <= self.attack_range:
-                            if self.attacking_timer <= 0:
-                                self.attacking_timer = 2.5
-                            else:
-                                self.attacking_timer -= dt
+                            self.attacking_timer += dt
+                            if self.attacking_timer >= 2.5:
+                                self.attacking_timer = 0
+                                self.damage(self.attack_damage)
                         else:
                             forward = Vec3(
                                 math.cos(-math.radians(self.rotation_y+90)),
@@ -343,7 +345,7 @@ class ObeliskusEnemy(Enemy):
             self.damage_flash *= 8
 
 class MaimeEnemy(Enemy):
-    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 15, ai_active: bool = True, exposed: bool = False):
+    def __init__(self, item: Item, speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 15, ai_active: bool = True, exposed: bool = False, attack_damage: float = 5):
         self.texture_scale = Vec2(15/item.scale.x, 15/item.scale.y)
         super().__init__(
             model="models/maime.glb",
@@ -365,6 +367,7 @@ class MaimeEnemy(Enemy):
         self.ai_active = ai_active
         self.itemColor = self.color = color.random_color()*color.gray
         self.texture = generate_noise_texture("maime_0", 15, 15)
+        self.attack_damage = attack_damage
 
         if not self.exposed:
             item.label.parent = self
@@ -442,14 +445,14 @@ class MaimeEnemy(Enemy):
             if self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 
-            if self.anim_controls["attack"].get_frame() == 15:
-                self.attack(5)
+            if self.anim_controls["attack"].get_frame() >= 15:
+                self.attack(self.attack_damage)
 
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
 
 class DiatrumEnemy(Enemy):
-    def __init__(self, position: tuple[float, float, float] = (0, 1.3, 0), max_health = 10, awareness_range: int = 10, ai_active: bool = True):
+    def __init__(self, position: tuple[float, float, float] = (0, 1.3, 0), max_health = 10, awareness_range: int = 10, ai_active: bool = True, attack_damage: float = 4):
         super().__init__(
             model="cube",
             position=position,
@@ -468,6 +471,7 @@ class DiatrumEnemy(Enemy):
         self.blinding_retexture_timer = 0
         self.origin_position = position
         self.animation_timer = 0
+        self.attack_damage = attack_damage
 
         self.set_shader_input(
             "texture_scale",
@@ -528,9 +532,9 @@ class DiatrumEnemy(Enemy):
                 if angle <= player.view_cone_half_angle:
                     self.blinding_timer += dt / 5
                     self.burn_timer += dt
-                    if self.burn_timer > 4:
+                    if self.burn_timer >= 4:
                         self.burn_timer = 0
-                        self.attack(4)
+                        self.attack(self.attack_damage)
                 else:
                     self.blinding_timer -= dt / 5
             else:
@@ -556,3 +560,43 @@ class DiatrumEnemy(Enemy):
             "position",
             self.position.xz + (self.scale.xz / 2)
         )
+
+class FeeterlugEnemy(Enemy):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), attack_damage: float = 4):
+        super().__init__(
+            model="models/feeterlug.glb",
+            position=position,
+            scale=1,
+            max_health=1,
+            color=color.dark_gray
+        )
+
+        self.anim_controls["idle"].play()
+        self.biting = False
+        self.bite_timer = 0
+        self.attack_damage = attack_damage
+
+    def update_entity(self, dt):
+        to_self = Vec3(
+            self.x - player.x,
+            0,
+            self.z - player.z
+        )
+
+        dist = max(to_self.length() - self.scale.length() / 2, 0)
+        if dist < 0.1 and not self.biting:
+            self.anim_controls["bite"].play()
+            self.biting = True
+            player.can_move = False
+        elif not self.biting and not self.anim_controls["idle"].is_playing():
+            self.anim_controls["idle"].play()
+        elif self.biting:
+            self.bite_timer += dt
+            if self.bite_timer >= 2.5:
+                self.bite_timer = 0
+                self.attack(self.attack_damage)
+
+    def damage(self, damage):
+        player.can_move = True
+        self.biting = False
+        return super().damage(damage)
