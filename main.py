@@ -185,6 +185,20 @@ def element_number_converter(value) -> float:
         return random.choice([element_number_converter(v) for v in value])
     return value
 
+def element_argument_converter(value):
+    if isinstance(value, str) and value != "":
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value
+    elif isinstance(value, dict) and value != {}:
+        minimum = element_argument_converter(value["min"])
+        maximum = element_argument_converter(value["max"])
+        return random.uniform(minimum, maximum)
+    elif isinstance(value, list) and len(value) > 0:
+        return random.choice([element_argument_converter(v) for v in value])
+    return value
+
 def load_waves(filepath: str):
     waves = []
     waves_data = json.load(open(filepath, "r"))
@@ -201,12 +215,14 @@ def load_waves(filepath: str):
                     continue
                 waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
                 waves[-1]["items"][-1].update(element.get("::"+elementIndex, {}))
+                waves[-1]["items"][-1].update(element_argument_converter(element.get("##"+elementIndex, {})))
             elif element_type == "rune":
                 if elementIndex == "":
                     continue
                 elementIndex = random.choice(element.pop("runes"))
                 waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
                 waves[-1]["runes"][-1].update(element.get("::"+elementIndex, {}))
+                waves[-1]["runes"][-1].update(element_argument_converter(element.get("##"+elementIndex, {})))
             elif element_type == "enemy":
                 if elementIndex == "":
                     continue
@@ -214,9 +230,10 @@ def load_waves(filepath: str):
 
                 kwargs = {"enemy": available_enemies[elementIndex]}
                 kwargs.update(element.get("::"+elementIndex, {}))
+                kwargs.update(element_argument_converter(element.get("##"+elementIndex, {})))
 
                 if kwargs["enemy"] == MaimeEnemy:
-                    kwargs["item"] = {"entity": available_items[random.choice(element["::"+elementIndex]["items"])], "position": position}
+                    kwargs["item"] = {"entity": available_items[kwargs["item"]], "position": position}
                 else:
                     kwargs["position"] = position
 

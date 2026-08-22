@@ -247,7 +247,7 @@ class StaticonEnemy(Enemy):
             self.update_texture_offset()
 
 class ObeliskusEnemy(Enemy):
-    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 0.5, awareness_range: int = 10, max_health: int = 50, ai_active: bool = True, attack_damage: float = 10):
+    def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4.5, size: int = 1, attack_range: int = 0.5, awareness_range: int = 10, max_health: int = 25, ai_active: bool = True, attack_damage: float = 10):
         super().__init__(
             model="models/obeliskus.glb",
             position=position,

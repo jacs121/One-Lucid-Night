@@ -13,7 +13,10 @@
         {
             "type": "item",
             "items": ["AmmoBox", "AmmoBox", ""],
-            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]]
+            "position": [[{"max": -5, "min": "l"}, {"min": 5, "max": "r"}], [{"min": 5, "max": "t"}, {"max": -5, "min": "b"}]],
+            "##AmmoBox": {
+                "ammo": {"min": 4, "max": 6}
+            }
         },
         {
             "type": "item",
@@ -57,37 +60,37 @@
         {
             "type": "enemy",
             "enemies": ["Staticon"],
-            "position": [[{"max": -1, "min": "l"}, {"min": 1, "max": "r"}], [{"min": 1, "max": "t"}, {"max": -1, "min": "b"}]]
+            "position": [[{"max": -1, "min": "l"}, {"min": 1, "max": "r"}], [{"min": 1, "max": "t"}, {"max": -1, "min": "b"}]],
+            "##Staticon": {
+                "attack_damage": {"min": 15, "max": 20}
+            }
         },
         {
             "type": "enemy",
             "enemies": ["Maime"],
             "position": [[{"max": -8, "min": "l"}, {"min": 8, "max": "r"}], [{"min": 8, "max": "t"}, {"max": -8, "min": "b"}]],
-            "::Maime": {
-                "item": {
-                    
-                }
+            "##Maime": {
+                "item": ["FullMedicineKit", "AmmoBox"]
             }
         },
         {
             "type": "enemy",
             "enemies": ["Obeliskus"],
-            "position": [[{"max": -2, "min": -15}, {"min": 2, "max": 15}], [{"min": 2, "max": 15}, {"max": -2, "min": -15}]]
+            "position": [[{"max": -2, "min": -15}, {"min": 2, "max": 15}], [{"min": 2, "max": 15}, {"max": -2, "min": -15}]],
+            "::Obeliskus": {
+                "attack_damage": 12,
+                "max_health": 30
+            }
         },
         {
             "type": "item",
-            "items": ["AmmoBox","AmmoBox",""],
+            "items": ["AmmoBox",""],
             "position": [[{"max": -1, "min": -4}, {"min": 1, "max": 4}], [{"min": 1, "max": 4}, {"max": -1, "min": -4}]]
         },
         {
             "type": "item",
             "items": ["AmmoBox"],
             "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
-        },
-        {
-            "type": "item",
-            "items": ["Medicine", "Medicine", "FullMedicineKit"],
-            "position": [[{"max": -6, "min": -12}, {"min": 6, "max": 12}], [{"min": 6, "max": 12}, {"max": -6, "min": -12}]]
         }
     ]
 ]

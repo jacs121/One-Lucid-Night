@@ -77,11 +77,12 @@ def dialogCallback4():
     tutorial.text = "TUTORIAL: PRESS R TO LOAD SHOTGUN"
 
 class AmmoBoxItem(Item):
-    def __init__(self, position = (0, 1.3, 0)):
+    def __init__(self, position = (0, 1.3, 0), ammo: int = 8):
         super().__init__("ammo box", position, 0.5)
+        self.ammo = ammo
 
     def give(self, distance, dt):
-        player.ammo_packets_count += 8
+        player.ammo_packets_count += self.ammo
 
 class MedicineItem(Item):
     def __init__(self, position = (0, 1.3, 0)):
