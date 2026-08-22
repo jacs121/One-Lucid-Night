@@ -16,6 +16,7 @@ Fight waves of oddly creepy enemies; survive until the last wave (which is not y
 * OBELISKUS: `a fast enemy that slows down the more health it's missing and stops for a short time when shot`
 * MAIME: `takes the form of a random Item with a slower animation and pops out when you get near him`
 
+* DIATRUM: `blinds you with light and hurts over time if you look at it, shaking valiantly while doing so`
 # Items
 
 * AMMO BOX: `gives you 8 bullets.`
@@ -33,10 +34,10 @@ Fight waves of oddly creepy enemies; survive until the last wave (which is not y
 
 # None implemented features
 
-* Add the Diatrum Enemy: `blinds you with light and hurts a bit over timeif you look at it`
-* Add the Feeterlug enemy: `walking on it makes you unable to move or shoot any other enemies except it; you need to kill it, and you cannot`
-* Create the default wave progression
-* Add a final boss
+
+* [ ] Add the Feeterlug enemy: `walking on it makes you unable to move or shoot any other enemies except it; you need to kill it`
+* [ ] Create the default wave progression
+* [ ] Add a final boss
 
 # Bugs, Issues, or Improvements
 
