@@ -9,7 +9,7 @@ def pauseAllAudio(pause: bool):
     if not pause:
         for audio in paused_audio:
             audio.resume()
-            paused_audio.remove(audio)
+        paused_audio.clear()
         return
     for entity in scene.entities:
         if isinstance(entity, Audio):
