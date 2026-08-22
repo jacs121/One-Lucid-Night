@@ -6,7 +6,7 @@
 One night, after a long day at work, you go to sleep in your room and start dreaming. But as your mind starts playing with memories and thoughts, you feel a shock through your spine as your vision goes black, falling into a dream you might never wake up from.
 
 # Gameplay
-Fight waves of oddly creepy enemies; survive until the last wave (which is not yet made) if you wish to **wake up**. You have a pump-action shotgun, though you need to manually pump it with your mouse after each shot (by moving towards and away from the player)
+Fight waves of oddly creepy enemies; survive until the last wave (which is not yet made) if you wish to **wake up**. You have a pump-action shotgun, though you need to manually pump it with your mouse after each shot (by moving it towards and away from the player)
 
 # Enemies
 * STATICON: `a 6-legged spider-like enemy that blends into the ground by trying to imitate its texture, stops moving if you're aiming at it`
