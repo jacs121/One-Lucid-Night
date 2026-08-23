@@ -180,6 +180,8 @@ def element_number_converter(value) -> float:
     elif isinstance(value, dict):
         minimum = element_number_converter(value["min"])
         maximum = element_number_converter(value["max"])
+        if value.get("floored", False):
+            return floor(random.uniform(minimum, maximum))
         return random.uniform(minimum, maximum)
     elif isinstance(value, list):
         return random.choice([element_number_converter(v) for v in value])
@@ -194,6 +196,8 @@ def element_argument_converter(value):
     elif isinstance(value, dict) and value != {}:
         minimum = element_argument_converter(value["min"])
         maximum = element_argument_converter(value["max"])
+        if value.get("floored", False):
+            return floor(random.uniform(minimum, maximum))
         return random.uniform(minimum, maximum)
     elif isinstance(value, list) and len(value) > 0:
         return random.choice([element_argument_converter(v) for v in value])
@@ -213,14 +217,15 @@ def load_waves(filepath: str):
                 elementIndex = random.choice(element.pop("items"))
                 if elementIndex == "":
                     continue
-                waves[-1]["items"].append({"item": available_items[elementIndex], "position": position})
+                waves[-1]["items"].append({"item": available_items[elementIndex], "position": element["position"]})
                 waves[-1]["items"][-1].update(element.get("::"+elementIndex, {}))
                 waves[-1]["items"][-1].update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
+                print(waves[-1]["items"][-1])
             elif element_type == "rune":
                 elementIndex = random.choice(element.pop("runes"))
                 if elementIndex == "":
                     continue
-                waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
+                waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": element["position"]})
                 waves[-1]["runes"][-1].update(element.get("::"+elementIndex, {}))
                 waves[-1]["runes"][-1].update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
             elif element_type == "enemy":
@@ -233,9 +238,9 @@ def load_waves(filepath: str):
                 kwargs.update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
 
                 if kwargs["enemy"] == MaimeEnemy:
-                    kwargs["item"] = {"entity": available_items[kwargs["item"]], "position": position}
+                    kwargs["item"] = {"entity": available_items[kwargs["item"]], "position": element["position"]}
                 else:
-                    kwargs["position"] = position
+                    kwargs["position"] = element["position"]
 
                 waves[-1]["enemies"].append(kwargs)
 

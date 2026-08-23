@@ -1,0 +1,44 @@
+[
+    [
+        {
+            "type": "enemy",
+            "enemies": ["Staticon"],
+            "position": [[{"max": -1, "min": "l"}, {"min": 1, "max": "r"}], [{"min": 1, "max": "t"}, {"max": -1, "min": "b"}]],
+            "##Staticon": {
+                "attack_damage": {"min": 15, "max": 20}
+            }
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Staticon"],
+            "position": [[{"max": -8, "min": "l"}, {"min": 8, "max": "r"}], [{"min": 8, "max": "t"}, {"max": -8, "min": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Maime"],
+            "position": [[{"max": -8, "min": "l"}, {"min": 8, "max": "r"}], [{"min": 8, "max": "t"}, {"max": -8, "min": "b"}]],
+            "##Maime": {
+                "item": ["FullMedicineKit", "AmmoBox"]
+            }
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Obeliskus"],
+            "position": [[{"max": -2, "min": -15}, {"min": 2, "max": 15}], [{"min": 2, "max": 15}, {"max": -2, "min": -15}]],
+            "::Obeliskus": {
+                "attack_damage": 12,
+                "max_health": 30
+            }
+        },
+        {
+            "type": "item",
+            "items": ["AmmoBox",""],
+            "position": [[{"max": -1, "min": -4}, {"min": 1, "max": 4}], [{"min": 1, "max": 4}, {"max": -1, "min": -4}]]
+        },
+        {
+            "type": "item",
+            "items": ["AmmoBox", "Medicine"],
+            "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+        }
+    ]
+]
