@@ -238,7 +238,7 @@ class StaticonEnemy(Enemy):
             elif self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 
-            if self.anim_controls["attack"].get_frame() >= 15:
+            if self.anim_controls["attack"].get_frame() == 15:
                 self.attack(self.attack_damage)
             if dist <= 1 and not self.anim_controls["attack"].is_playing():
                 self.anim_controls["idle"].play()
@@ -445,7 +445,7 @@ class MaimeEnemy(Enemy):
             if self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 
-            if self.anim_controls["attack"].get_frame() >= 15:
+            if self.anim_controls["attack"].get_frame() == 15:
                 self.attack(self.attack_damage)
 
             if dist <= 1 and not self.anim_controls["attack"].is_playing():

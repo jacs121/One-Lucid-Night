@@ -217,16 +217,16 @@ def load_waves(filepath: str):
                 waves[-1]["items"][-1].update(element.get("::"+elementIndex, {}))
                 waves[-1]["items"][-1].update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
             elif element_type == "rune":
+                elementIndex = random.choice(element.pop("runes"))
                 if elementIndex == "":
                     continue
-                elementIndex = random.choice(element.pop("runes"))
                 waves[-1]["runes"].append({"rune": available_runes[elementIndex], "position": position})
                 waves[-1]["runes"][-1].update(element.get("::"+elementIndex, {}))
                 waves[-1]["runes"][-1].update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
             elif element_type == "enemy":
+                elementIndex = random.choice(element.pop("enemies"))
                 if elementIndex == "":
                     continue
-                elementIndex = random.choice(element.pop("enemies"))
 
                 kwargs = {"enemy": available_enemies[elementIndex]}
                 kwargs.update(element.get("::"+elementIndex, {}))
