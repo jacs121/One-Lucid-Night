@@ -3,19 +3,20 @@ from imports import *
 title = "One Lucid Night"
 app = Ursina(title)
 
-paused_audio: set[Audio] = set()
+paused_audio: set[int] = set()
 
 def pauseAllAudio(pause: bool):
-    if not pause:
-        for audio in paused_audio:
-            audio.resume()
-        paused_audio.clear()
-        return
-    for entity in scene.entities:
-        if isinstance(entity, Audio):
-            if pause and entity.playing:
+    if pause:
+        for entity in scene.entities:
+            if isinstance(entity, Audio) and entity.playing:
                 entity.pause()
-                paused_audio.add(entity)
+                paused_audio.add(id(entity))
+    else:
+        for entity in scene.entities:
+            if isinstance(entity, Audio) and id(entity) in paused_audio:
+                entity.resume()
+
+        paused_audio.clear()
 
 def pauseAllSequences(pause: bool):
     for entity in scene.entities:
