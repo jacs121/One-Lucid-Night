@@ -106,7 +106,7 @@ class StaticonEnemy(Enemy):
     def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), speed: float = 4, size: int = 1, attack_range: int = 1, awareness_range: int = 10, max_health: int = 20, base_color: color.Color = color.gray, ai_active: bool = True, attack_damage: float = 16):
         super().__init__(
             model="models/staticon.glb",
-            scale=size,
+            scale=Vec3(size, 0, size),
             position=position,
             max_health=max_health,
             color=base_color
