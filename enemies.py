@@ -12,7 +12,7 @@ class AnimStub:
     def stop(self):
         self._playing = False
     def is_playing(self):
-        return getattr(self, "_playing", False)
+        return self._playing
     def get_frame(self):
         return 0
 
