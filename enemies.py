@@ -561,10 +561,10 @@ class DiatrumEnemy(Enemy):
             self.position.xz + (self.scale.xz / 2)
         )
 
-class FeeterlugEnemy(Enemy):
+class FeeterslugEnemy(Enemy):
     def __init__(self, position: tuple[int, int, int] = (0, 1.3, 0), attack_damage: float = 4):
         super().__init__(
-            model="models/feeterlug.glb",
+            model="models/feeterslug.glb",
             position=position,
             scale=1,
             max_health=1,
@@ -575,6 +575,16 @@ class FeeterlugEnemy(Enemy):
         self.biting = False
         self.bite_timer = 0
         self.attack_damage = attack_damage
+
+        if self.enabled:
+            print("a diatrum has been summoned:")
+            print("    position:", position)
+            print("    stats:")
+            print("        SIZE:", self.scale.length())
+            print("        HEALTH/MAX_HEALTH:", self.health)
+            print("        AWARENESS_RANGE:", self.awareness_range)
+            print("    texture seeds:", *self.texture_seeds)
+            print("    game ai:", self.ai_active)
 
     def update_entity(self, dt):
         to_self = Vec3(

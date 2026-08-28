@@ -313,18 +313,19 @@ WM_SETICON = 0x0080
 ICON_SMALL = 0
 ICON_BIG = 1
 
-hwnd = ctypes.windll.user32.FindWindowW(None, title)
+if sys.platform == "win32":
+    hwnd = ctypes.windll.user32.FindWindowW(None, title)
 
-icon = ctypes.windll.user32.LoadImageW(
-    None,
-    application.asset_folder.as_posix() + "/icons/icon.ico",
-    1,
-    0,
-    0,
-    0x00000010
-)
+    icon = ctypes.windll.user32.LoadImageW(
+        None,
+        application.asset_folder.as_posix() + "/icons/icon.ico",
+        1,
+        0,
+        0,
+        0x00000010
+    )
 
-ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
-ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
+    ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
+    ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
 
 default_player_direction = -math.radians(-90)

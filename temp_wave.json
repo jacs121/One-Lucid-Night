@@ -1,0 +1,9 @@
+[
+    [
+        {
+            "type": "enemy",
+            "enemies": ["Feeterslug"],
+            "position": [0, 0]
+        }
+    ]
+]
