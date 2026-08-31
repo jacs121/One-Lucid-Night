@@ -28,7 +28,7 @@ Fight waves of oddly creepy enemies; survive until the last wave (which is not y
 * BLOOD RUNE (3 uses): `tells you how much health percentage you have left as blood`
 
 # None implemented features
-* [ ] Add the Feeterlug enemy: `walking on it makes you unable to move or shoot any other enemies except it; you need to kill it`
+* [x] Add the Feeterlug enemy: `walking on it makes you unable to move or shoot any other enemies except it; you need to kill it` (scrapped)
 * [ ] Create the default wave progression
 * [ ] Add a final boss
 
