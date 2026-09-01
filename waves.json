@@ -3,12 +3,12 @@
         {
             "type": "enemy",
             "enemies": ["Staticon"],
-            "position": [{"min": 0, "max": "r"}, [{"min": 0, "max": "t"}, {"max": -5, "min": "b"}]]
+            "position": [{"min": "l", "max": "r"}, [{"min": 0, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "enemy",
             "enemies": ["Staticon"],
-            "position": [{"max": 0, "min": "l"}, [{"min": 0, "max": "t"}, {"max": -5, "min": "b"}]]
+            "position": [{"max": "r", "min": "l"}, [{"min": 0, "max": "t"}, {"max": -5, "min": "b"}]]
         },
         {
             "type": "item",
@@ -94,6 +94,46 @@
             "type": "item",
             "items": ["AmmoBox", "Medicine"],
             "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+        }
+    ],
+    [
+        {
+            "type": "enemy",
+            "enemies": ["Staticon"],
+            "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Staticon", "Obeliskus"],
+            "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+        },
+        {
+            "type": "enemy",
+            "enemies": ["Diatrum"],
+            "position": [[{"max": -3, "min": "l"}, {"min": 3, "max": "r"}], [{"min": 3, "max": "t"}, {"max": -3, "min": "b"}]]
+        },
+        {
+            "type": "rune",
+            "runes": ["Harm"],
+            "position": [0,0],
+            "##Harm": {
+                "required_experience": {"min": 0, "max": 6, "floored": true}
+            }
+        },
+        {
+            "type": "item",
+            "items": ["AmmoBox"],
+            "position": [[{"max": -10, "min": "l"}, {"min": 10, "max": "r"}], [{"min": 10, "max": "t"}, {"max": -10, "min": "b"}]]
+        },
+        {
+            "type": "item",
+            "items": ["AmmoBox"],
+            "position": [[{"max": -10, "min": "l"}, {"min": 10, "max": "r"}], [{"min": 10, "max": "t"}, {"max": -10, "min": "b"}]]
+        },
+        {
+            "type": "item",
+            "items": ["Medicine", "Medicine", ""],
+            "position": [{"max": "r", "min": "l"}, {"min": "b", "max": "t"}]
         }
     ]
 ]
