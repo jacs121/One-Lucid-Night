@@ -52,7 +52,7 @@ class Enemy(Entity):
                 char = char_match.node()
                 part_bundle = char.getBundle(0)
 
-                for node in self.model.findAllMatches("**/+AnimBundleNode"):
+                for node in char_match.findAllMatches("+AnimBundleNode"):
                     bundle = node.node().getBundle()
 
                     control = part_bundle.bindAnim(
@@ -68,8 +68,34 @@ class Enemy(Entity):
                 print("warning: failed to bind animations; using stub controls")
                 self.anim_controls = {"idle": AnimStub()}
         else:
-            print("warning: model has no Character node; using stub controls")
-            self.anim_controls = {"idle": AnimStub()}
+            char_match = self.model.find("**/entity")
+            if not char_match.isEmpty():
+                try:
+                    anim_nodes = char_match.findAllMatches("+AnimBundleNode")
+
+                    if anim_nodes.isEmpty():
+                        raise RuntimeError("no AnimBundleNodes found")
+
+                    char = char_match.node()
+                    part_bundle = char.getBundle(0)
+
+                    for node in anim_nodes:
+                        bundle = node.node().getBundle()
+                        control = part_bundle.bindAnim(
+                            bundle,
+                            part_bundle.HMF_ok_anim_extra |
+                            part_bundle.HMF_ok_part_extra |
+                            part_bundle.HMF_ok_wrong_root_name,
+                            PartSubset(),
+                        )
+
+                        self.anim_controls[bundle.getName()] = control
+                except Exception as e:
+                    print(f"warning: {e}; using stub controls")
+                    self.anim_controls = {"idle": AnimStub()}
+            else:
+                print("warning: model has no Character/entity node; using stub controls")
+                self.anim_controls = {"idle": AnimStub()}
 
     def update_entity(self, dt):
         pass
@@ -139,7 +165,7 @@ class StaticonEnemy(Enemy):
             print("    model:", self.model)
             print("    position:", position)
             print("    available animation:")
-            print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
+            print("        "+"\n        ".join(self.anim_controls.keys()).upper())
             print("    animation:", "idle")
             print("    stats:")
             print("        SPEED:", self.speed)
@@ -269,7 +295,7 @@ class ObeliskusEnemy(Enemy):
             print("    position:", position)
             print("    model:", self.model)
             print("    available animation:")
-            print("\n        "+"\n        ".join(self.anim_controls.keys()).upper())
+            print("        "+"\n        ".join(self.anim_controls.keys()).upper())
             print("    animation:", "idle")
             print("    stats:")
             print("        SPEED:", self.speed)
@@ -382,7 +408,7 @@ class MaimeEnemy(Enemy):
             print("        MODEL: item/", item.label.text.lower().replace(" ", "_"))
             print("        SCALE:", self.itemData[1])
             print("    available animation:")
-            print("\n        ".join(self.anim_controls.keys()).upper())
+            print("        "+"\n        ".join(self.anim_controls.keys()).upper())
             print("    animation:", "idle")
             print("    stats:")
             print("        SPEED:", self.speed)
