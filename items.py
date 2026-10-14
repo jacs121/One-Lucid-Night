@@ -32,6 +32,7 @@ class Item(Entity):
         self.item_name = item_name
         self.gather_distance = gather_distance
         self.fade_in_timer = 0
+        self.position = position
 
         self.set_shader_input(
             "position",
