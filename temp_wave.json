@@ -2,8 +2,10 @@
     [
         {
             "type": "enemy",
-            "enemies": ["Feeterslug"],
-            "position": [0, 0]
+            "enemies": ["Maime"],
+            "position": [0, 0],
+            "item": "Medicine"
+            
         }
     ]
 ]

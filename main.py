@@ -167,7 +167,7 @@ for (item, rune, enemy) in zip_longest(Item.__subclasses__(), Rune.__subclasses_
     if enemy:
         available_enemies.update({enemy.__name__[:-5]: enemy})
 
-wave_location = "./waves.json"
+wave_location = "./temp_wave.json"
 
 if not os.path.exists(wave_location):
     wave_location = application.asset_folder / "waves.json"
@@ -220,7 +220,6 @@ def load_waves(filepath: str):
                 waves[-1]["items"].append({"item": available_items[elementIndex], "position": element["position"]})
                 waves[-1]["items"][-1].update(element.get("::"+elementIndex, {}))
                 waves[-1]["items"][-1].update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
-                print(waves[-1]["items"][-1])
             elif element_type == "rune":
                 elementIndex = random.choice(element.pop("runes"))
                 if elementIndex == "":
@@ -238,7 +237,7 @@ def load_waves(filepath: str):
                 kwargs.update({k: element_argument_converter(v) for k, v in element.get("##"+elementIndex, {}).items()})
 
                 if kwargs["enemy"] == MaimeEnemy:
-                    kwargs["item"] = {"entity": available_items[kwargs["item"]], "position": element["position"]}
+                    kwargs["item"] = {"entity": available_items[element["item"]], "position": element["position"]}
                 else:
                     kwargs["position"] = element["position"]
 

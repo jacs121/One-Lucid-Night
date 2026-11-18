@@ -388,24 +388,23 @@ class MaimeEnemy(Enemy):
         self.speed = speed
         self.exposed = exposed
         self.timer = 0
-        self.itemData = (item.model, item.scale)
+        self.itemData = (item.model, item.scale, item.label)
         self.fade_in_timer = 0
         self.ai_active = ai_active
-        self.itemColor = self.color = color.random_color()*color.gray
+        self.itemColor = self.color = color.Color(color.random_color()*color.gray)
         self.texture = generate_noise_texture("maime_0", 15, 15)
         self.attack_damage = attack_damage
 
         if not self.exposed:
-            item.label.parent = self
-            self.label = item.label
+            self.label = self.itemData[2]
 
         destroy(item)
 
         if self.enabled:
             print("a maime has been summoned:")
-            print("    position:", item.position)
+            print("    position:", self.position)
             print("    item disguised:", self.model)
-            print("        MODEL: item/", item.label.text.lower().replace(" ", "_"))
+            print("        MODEL: item/", self.itemData[2].text.lower().replace(" ", "_"))
             print("        SCALE:", self.itemData[1])
             print("    available animation:")
             print("        "+"\n        ".join(self.anim_controls.keys()).upper())
@@ -468,15 +467,15 @@ class MaimeEnemy(Enemy):
                         if not self.anim_controls["walk"].is_playing():
                             self.anim_controls["walk"].play()
 
+                if dist <= 1 and not self.anim_controls["attack"].is_playing():
+                    self.anim_controls["idle"].play()
+
+
             if self.anim_controls["attack"].get_frame() < 15:
                 self.anim_controls["attack"].stop()
 
             if self.anim_controls["attack"].get_frame() == 15:
                 self.attack(self.attack_damage)
-
-            if dist <= 1 and not self.anim_controls["attack"].is_playing():
-                self.anim_controls["idle"].play()
-
 class DiatrumEnemy(Enemy):
     def __init__(self, position: tuple[float, float, float] = (0, 1.3, 0), max_health = 10, awareness_range: int = 10, ai_active: bool = True, attack_damage: float = 4):
         super().__init__(
